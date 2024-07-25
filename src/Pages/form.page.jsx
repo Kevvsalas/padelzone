@@ -1,115 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import { database } from '../firebase';
-import { ref, set, push, onValue, remove } from 'firebase/database';
+import { ref, onValue } from 'firebase/database';
 import styles from './form.module.css';
-import borrar from '../assets/borrar.png';
 import Card from '../components/card';
 
-const Config = () => {
-  const [playerName, setPlayerName] = useState('');
-  const [score, setScore] = useState(0);
+const FirebaseExample = () => {
   const [players, setPlayers] = useState([]);
-  const [errors, setErrors] = useState({});
-
-  const addPlayer = () => {
-    const playerRef = ref(database, 'player');
-    const newPlayerRef = push(playerRef);
-
-    const newPlayer = {
-      name: playerName,
-      score: score
-    };
-
-    set(newPlayerRef, newPlayer);
-    setPlayerName('');
-    setScore(0);
-  };
-
-  const clearDatabase = () => {
-    const playerRef = ref(database, 'player');
-    remove(playerRef)
-      .then(() => {
-        console.log('Database cleared successfully');
-      })
-      .catch((error) => {
-        console.error('Error clearing database:', error);
-      });
-  };
-
-  const handleChangeName = (e) => {
-    setPlayerName(e.target.value);
-  };
-
-  const handleChangeScore = (e) => {
-    setScore(e.target.value);
-  };
-
-  const validate = () => {
-    let tempErrors = {};
-    if (!playerName) tempErrors.name = "Name is required";
-    if (score === '' || isNaN(score) || score < 0) tempErrors.score = "Valid score is required";
-    return tempErrors;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const tempErrors = validate();
-    setErrors(tempErrors);
-    if (Object.keys(tempErrors).length === 0) {
-      addPlayer();
-    }
-  };
+  const [rounds, setRounds] = useState([]);
 
   useEffect(() => {
+    // Lee los jugadores de Firebase
     const playerRef = ref(database, 'player');
-
-    const unsubscribe = onValue(playerRef, (snapshot) => {
+    const unsubscribePlayers = onValue(playerRef, (snapshot) => {
       const data = snapshot.val();
       const playersList = data ? Object.entries(data).map(([id, player]) => ({ id, ...player })) : [];
       setPlayers(playersList);
     });
 
-    return () => unsubscribe();
+    // Lee los resultados de las rondas de Firebase
+    const roundsRef = ref(database, 'rondas');
+    const unsubscribeRounds = onValue(roundsRef, (snapshot) => {
+      const data = snapshot.val();
+      const roundsData = data ? Object.entries(data).map(([id, round]) => ({ id, ...round })) : [];
+      setRounds(roundsData);
+    });
+
+    return () => {
+      unsubscribePlayers();
+      unsubscribeRounds();
+    };
   }, []);
 
-
-  const matchesRonda1 = [
-    { team1Indices: [0, 1], team2Indices: [2, 3] },
-    { team1Indices: [4, 5], team2Indices: [6, 7] }
-  ];
-  
-  const matchesRonda2 = [
-    { team1Indices: [0, 2], team2Indices: [4, 6] },
-    { team1Indices: [1, 3], team2Indices: [5, 7] }
-  ];
-
-  const matchesRonda3 = [
-    { team1Indices: [1, 2], team2Indices: [5, 6] },
-    { team1Indices: [0, 3], team2Indices: [5, 7] }
-  ];
-
-  const matchesRonda4 = [
-    { team1Indices: [0, 4], team2Indices: [1, 5] },
-    { team1Indices: [2, 6], team2Indices: [3, 7] }
-  ];
-
-  const matchesRonda5 = [
-    { team1Indices: [1, 4], team2Indices: [3, 6] },
-    { team1Indices: [0, 5], team2Indices: [2, 7] }
-  ];
-
-  const matchesRonda6 = [
-    { team1Indices: [1, 7], team2Indices: [2, 4] },
-    { team1Indices: [0, 6], team2Indices: [3, 5] }
-  ];
-
-  const matchesRonda7 = [
-    { team1Indices: [2, 5], team2Indices: [3, 4] },
-    { team1Indices: [0, 7], team2Indices: [1, 6] }
-  ];
-
-
-
+  // Puedes definir los detalles de los partidos si los necesitas para la visualización
+  // Aquí usamos datos de rondas ya que los resultados están en Firebase
+  const getMatchDetails = (round) => {
+    // Ajusta esto según la estructura de tus datos en Firebase
+    return round.resultados.map((match, index) => ({
+      team1Indices: [],  // Definir índices según los datos disponibles
+      team2Indices: [],  // Definir índices según los datos disponibles
+      ...match
+    }));
+  };
 
   return (
     <div className={styles.container}>
@@ -127,20 +58,21 @@ const Config = () => {
               </div>
             </li>
           ))}
-          
         </ul>
+
         <div className={styles.jornada_section}>
-        <Card ronda="Ronda 1" players={players} matchDetails={matchesRonda1} />
-        <Card ronda="Ronda 2" players={players} matchDetails={matchesRonda2} />
-        <Card ronda="Ronda 3" players={players} matchDetails={matchesRonda3} />
-        <Card ronda="Ronda 4" players={players} matchDetails={matchesRonda4} />
-        <Card ronda="Ronda 5" players={players} matchDetails={matchesRonda5} />
-        <Card ronda="Ronda 6" players={players} matchDetails={matchesRonda6} />
-        <Card ronda="Ronda 7" players={players} matchDetails={matchesRonda7} />
+          {rounds.map((round) => (
+            <Card 
+              key={round.id}
+              ronda={`Ronda ${round.ronda}`}
+              players={players}
+              matchDetails={getMatchDetails(round)}
+            />
+          ))}
         </div>
       </div>
     </div>
   );
 };
 
-export default Config;
+export default FirebaseExample;

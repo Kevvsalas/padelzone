@@ -28,7 +28,16 @@ const Config = () => {
 
   const clearDatabase = () => {
     const playerRef = ref(database, 'player');
+    const rondasRef = ref(database, 'rondas');
     remove(playerRef)
+      .then(() => {
+        console.log('Database cleared successfully');
+      })
+      .catch((error) => {
+        console.error('Error clearing database:', error);
+      });
+
+      remove(rondasRef)
       .then(() => {
         console.log('Database cleared successfully');
       })
@@ -41,9 +50,6 @@ const Config = () => {
     setPlayerName(e.target.value);
   };
 
-  const handleChangeScore = (e) => {
-    setScore(e.target.value);
-  };
 
   const validate = () => {
     let tempErrors = {};
@@ -138,7 +144,7 @@ const Config = () => {
               </div>
               <div className={styles.score}>
                 {player.score}
-              </div>
+              </div>  
             </li>
           ))}
           <div className={styles.delete}>
@@ -146,13 +152,13 @@ const Config = () => {
           </div>
         </ul>
         <div className={styles.jornada_section}>
-        <Cardconfig ronda="Ronda 1" players={players} matchDetails={matchesRonda1} />
-        <Cardconfig ronda="Ronda 2" players={players} matchDetails={matchesRonda2} />
-        <Cardconfig ronda="Ronda 3" players={players} matchDetails={matchesRonda3} />
-        <Cardconfig ronda="Ronda 4" players={players} matchDetails={matchesRonda4} />
-        <Cardconfig ronda="Ronda 5" players={players} matchDetails={matchesRonda5} />
-        <Cardconfig ronda="Ronda 6" players={players} matchDetails={matchesRonda6} />
-        <Cardconfig ronda="Ronda 7" players={players} matchDetails={matchesRonda7} />
+        <Cardconfig ronda="1" players={players} matchDetails={matchesRonda1} />
+        <Cardconfig ronda="2" players={players} matchDetails={matchesRonda2} />
+        <Cardconfig ronda="3" players={players} matchDetails={matchesRonda3} />
+        <Cardconfig ronda="4" players={players} matchDetails={matchesRonda4} />
+        <Cardconfig ronda="5" players={players} matchDetails={matchesRonda5} />
+        <Cardconfig ronda="6" players={players} matchDetails={matchesRonda6} />
+        <Cardconfig ronda="7" players={players} matchDetails={matchesRonda7} />
         </div>
       </div>
     </div>

@@ -1,42 +1,90 @@
 import React, { useState } from 'react';
 import styles from './cardConfig.module.css';
+import { ref, update, set } from 'firebase/database';
+import { database } from '../firebase';
 
 const Cardconfig = ({ ronda, players, matchDetails }) => {
-  // Inicializa el estado de resultados con dos entradas para cada partido, una por equipo
+
   const [results, setResults] = useState(
     matchDetails.map(() => ({ team1: '', team2: '' }))
   );
+  const [formData, setFormData] = useState({
+    input1: '',
+    input2: '',
+  });
 
+  
   const getPlayerNames = (indices) => {
     return indices.map(index => players[index] ? players[index].name : 'N/A');
   };
 
-  const handleResultChange = (matchIndex, team, value) => {
+  const handleResultChange = (matchIndex, team, value,) => {
+    
     const updatedResults = [...results];
     updatedResults[matchIndex][team] = value;
     setResults(updatedResults);
   };
 
+  const [isDisabled, setIsDisabled] = useState(false);
+  
   const handleFinalizarRonda = () => {
-    // Muestra los resultados y la información de los jugadores en consola
+    setIsDisabled(true);
+    const rondaData = {
+      ronda: ronda,
+      resultados: matchDetails.map((match, index) => {
+        const [team1Player1, team1Player2] = getPlayerNames(match.team1Indices);
+        const [team2Player1, team2Player2] = getPlayerNames(match.team2Indices);
+        return {
+          partido: `Partido ${index + 1}`,
+          equipo1: `${team1Player1}, ${team1Player2}`,
+          equipo2: `${team2Player1}, ${team2Player2}`,
+          marcadorEquipo1: results[index].team1,
+          marcadorEquipo2: results[index].team2,
+        };
+      })
+    };
+
+    // Guarda los datos de la ronda en Firebase
+    const rondaRef = ref(database, `rondas/${ronda}`);
+    set(rondaRef, rondaData).then(() => {
+      console.log('Datos guardados exitosamente en Firebase.');
+    }).catch((error) => {
+      console.error('Error al guardar en Firebase:', error);
+    });
+
+    // Actualiza el puntaje de los jugadores con los puntajes del partido
     matchDetails.forEach((match, index) => {
       const [team1Player1, team1Player2] = getPlayerNames(match.team1Indices);
       const [team2Player1, team2Player2] = getPlayerNames(match.team2Indices);
 
+      const team1Score = parseInt(results[index].team1, 10);
+      const team2Score = parseInt(results[index].team2, 10);
+
+      updatePlayerScore(team1Player1, team1Score);
+      updatePlayerScore(team1Player2, team1Score);
+      updatePlayerScore(team2Player1, team2Score);
+      updatePlayerScore(team2Player2, team2Score);
+
       console.log(`Partido ${index + 1}:`);
-      console.log(`Equipo 1: ${team1Player1}, ${team1Player2} - Marcador: ${results[index].team1}`);
-      console.log(`Equipo 2: ${team2Player1}, ${team2Player2} - Marcador: ${results[index].team2}`);
+      console.log(`Equipo 1: ${team1Player1}, ${team1Player2} - Marcador: ${team1Score}`);
+      console.log(`Equipo 2: ${team2Player1}, ${team2Player2} - Marcador: ${team2Score}`);
     });
 
-    // Aquí puedes agregar la lógica para actualizar la base de datos con los resultados.
-    console.log('Resultados de la ronda:', results);
-    // Ejemplo de código para guardar en Firebase (ajusta según tu estructura de datos):
-    // const resultRef = ref(database, 'rondas/' + ronda);
-    // set(resultRef, results);
+    console.log(`Resultados de la ronda ${ronda}:`, results);
+  };
+
+  const updatePlayerScore = (playerName, scoreToAdd) => {
+    // Encuentra el jugador por nombre y actualiza su puntaje
+    const player = players.find(player => player.name === playerName);
+    if (player) {
+      const playerRef = ref(database, `player/${player.id}`);
+      update(playerRef, { score: (player.score || 0) + scoreToAdd });
+    } else {
+      console.error(`Jugador no encontrado: ${playerName}`);
+    }
   };
 
   const renderMatch = (cancha, team1Indices, team2Indices, matchIndex) => {
-    // Obtén los nombres de los jugadores para cada equipo
     const [team1Player1, team1Player2] = getPlayerNames(team1Indices);
     const [team2Player1, team2Player2] = getPlayerNames(team2Indices);
 
@@ -53,16 +101,22 @@ const Cardconfig = ({ ronda, players, matchDetails }) => {
         <div className={styles.marcador}>
           <input
             type="text"
+            name='input1'
             value={results[matchIndex].team1}
             onChange={(e) => handleResultChange(matchIndex, 'team1', e.target.value)}
+            disabled={isDisabled}
+            className={isDisabled ? styles.disabled : ''}
           />
         </div>
 
         <div className={styles.marcador}>
           <input
             type="text"
+            name='input2'
             value={results[matchIndex].team2}
             onChange={(e) => handleResultChange(matchIndex, 'team2', e.target.value)}
+            disabled={isDisabled}
+            className={isDisabled ? styles.disabled : ''}
           />
         </div>
 
@@ -76,11 +130,15 @@ const Cardconfig = ({ ronda, players, matchDetails }) => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.button} onClick={handleFinalizarRonda}>
+      <button
+        className={`${isDisabled ? styles.disabledButton : styles.button}`}
+        onClick={handleFinalizarRonda}
+        disabled={isDisabled}
+      >
         Finalizar ronda
-      </div>
+      </button>
       <div className={styles.ronda}>
-        {ronda}
+        Ronda {ronda}
       </div>
       {matchDetails.map((match, index) =>
         renderMatch(index + 1, match.team1Indices, match.team2Indices, index)
