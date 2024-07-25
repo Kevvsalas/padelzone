@@ -101,15 +101,15 @@ const FirebaseExample = () => {
           </div>
         </ul>
         <div className={styles.jornada_section}>
-          <Card title="Jornada 2" players={players}></Card>
-          <Card title="Jornada 2" players={players}></Card>
-          <Card title="Jornada 2" players={players}></Card>
-          <Card title="Jornada 2" players={players}></Card>
-          <Card title="Jornada 2" players={players}></Card>
-          <Card title="Jornada 2" players={players}></Card>
-          <Card title="Jornada 2" players={players}></Card>
-          <Card title="Jornada 2" players={players}></Card>
-          {/* <Jornada_Card title="Jornada 1" players={players}></Jornada_Card> 
+          <Card ronda="Ronda 1" players={players}></Card>
+          <Card ronda="Ronda 2" players={players}></Card>
+          <Card ronda="Ronda 3" players={players}></Card>
+          <Card ronda="Ronda 4" players={players}></Card>
+          <Card ronda="Ronda 5" players={players}></Card>
+          <Card ronda="Ronda 6" players={players}></Card>
+          <Card ronda="Ronda 7" players={players}></Card>
+          <Card ronda="Ronda 8" players={players}></Card>
+          {/* <Jornada_Card ttle="Jornada 1" players={players}></Jornada_Card> 
           <Jornada_Card title="Jornada 2" players={players}></Jornada_Card> 
           <Jornada_Card title="Jornada 3" players={players}></Jornada_Card> 
           <Jornada_Card title="Jornada 4" players={players}></Jornada_Card> 

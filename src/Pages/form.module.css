@@ -91,7 +91,7 @@
     flex-wrap: nowrap;
     padding: 10px;
     display: flex;
-    gap: 2%;
+    gap: 3%;
     margin: 0;
 }
 
@@ -135,7 +135,7 @@
   }
 
   .name::-webkit-scrollbar-track {
-    background: lightslategrey; /* Color de fondo del track */
+    background: white; /* Color de fondo del track */
   }
   
   .name::-webkit-scrollbar-thumb {
