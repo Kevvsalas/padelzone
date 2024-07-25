@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { database } from '../firebase';
-import { ref, set, push, onValue , remove} from 'firebase/database';
-import styles from './config.module.css'
-import borrar from '../assets/borrar.png'
+import { ref, set, push, onValue, remove } from 'firebase/database';
+import styles from './form.module.css';
+import borrar from '../assets/borrar.png';
 
-// import Jornada_Card from '../components/jornada_Card';
+import Cardconfig from '../components/cardConfig';
 
-const FirebaseExample = () => {
+const Config = () => {
   const [playerName, setPlayerName] = useState('');
   const [score, setScore] = useState(0);
   const [players, setPlayers] = useState([]);
+  const [errors, setErrors] = useState({});
 
   const addPlayer = () => {
     const playerRef = ref(database, 'player');
@@ -36,14 +37,29 @@ const FirebaseExample = () => {
       });
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    if (playerName.trim() !== '') { 
+  const handleChangeName = (e) => {
+    setPlayerName(e.target.value);
+  };
+
+  const handleChangeScore = (e) => {
+    setScore(e.target.value);
+  };
+
+  const validate = () => {
+    let tempErrors = {};
+    if (!playerName) tempErrors.name = "Name is required";
+    if (score === '' || isNaN(score) || score < 0) tempErrors.score = "Valid score is required";
+    return tempErrors;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const tempErrors = validate();
+    setErrors(tempErrors);
+    if (Object.keys(tempErrors).length === 0) {
       addPlayer();
     }
   };
-
- 
 
   useEffect(() => {
     const playerRef = ref(database, 'player');
@@ -57,6 +73,45 @@ const FirebaseExample = () => {
     return () => unsubscribe();
   }, []);
 
+
+  const matchesRonda1 = [
+    { team1Indices: [0, 1], team2Indices: [2, 3] },
+    { team1Indices: [4, 5], team2Indices: [6, 7] }
+  ];
+  
+  const matchesRonda2 = [
+    { team1Indices: [0, 2], team2Indices: [4, 6] },
+    { team1Indices: [1, 3], team2Indices: [5, 7] }
+  ];
+
+  const matchesRonda3 = [
+    { team1Indices: [1, 2], team2Indices: [5, 6] },
+    { team1Indices: [0, 3], team2Indices: [5, 7] }
+  ];
+
+  const matchesRonda4 = [
+    { team1Indices: [0, 4], team2Indices: [1, 5] },
+    { team1Indices: [2, 6], team2Indices: [3, 7] }
+  ];
+
+  const matchesRonda5 = [
+    { team1Indices: [1, 4], team2Indices: [3, 6] },
+    { team1Indices: [0, 5], team2Indices: [2, 7] }
+  ];
+
+  const matchesRonda6 = [
+    { team1Indices: [1, 7], team2Indices: [2, 4] },
+    { team1Indices: [0, 6], team2Indices: [3, 5] }
+  ];
+
+  const matchesRonda7 = [
+    { team1Indices: [2, 5], team2Indices: [3, 4] },
+    { team1Indices: [0, 7], team2Indices: [1, 6] }
+  ];
+
+
+
+
   return (
     <div className={styles.container}>
       <h1>Americanas Padel Zone</h1>
@@ -64,61 +119,44 @@ const FirebaseExample = () => {
       <form className={styles.formulario} onSubmit={handleSubmit}>
         <input
           type="text"
+          name="name"
           value={playerName}
-          onChange={(e) => setPlayerName(e.target.value)}
+          onChange={handleChangeName}
           placeholder="Enter player name"
         />
+        {errors.name && <span style={{ color: 'red' }}>{errors.name}</span>}
         
-        <button onClick={addPlayer}>Add Player</button>
+        <button type="submit">Add Player</button>
       </form>
 
       <div className={styles.section1}>
         <ul className={styles.list}>
-
-
-              {players.map((player) => (
-                <li key={player.id}>     
-
-                <div className={styles.name}>
-                    {player.name} 
-                  </div>          
-                <div className={styles.score}>
-                  
-                  {player.score}
-                  </div>
-                
-                </li>
-                
-              ))}
-
-              
-
-          
+          {players.map((player) => (
+            <li key={player.id}>
+              <div className={styles.name}>
+                {player.name}
+              </div>
+              <div className={styles.score}>
+                {player.score}
+              </div>
+            </li>
+          ))}
           <div className={styles.delete}>
             <img src={borrar} alt="borrar" onClick={clearDatabase} />
           </div>
         </ul>
         <div className={styles.jornada_section}>
-          {/* <Jornada_Card title="Jornada 1" players={players}></Jornada_Card> 
-          <Jornada_Card title="Jornada 2" players={players}></Jornada_Card> 
-          <Jornada_Card title="Jornada 3" players={players}></Jornada_Card> 
-          <Jornada_Card title="Jornada 4" players={players}></Jornada_Card> 
-          <Jornada_Card title="Jornada 5" players={players}></Jornada_Card> 
-          <Jornada_Card title="Jornada 6" players={players}></Jornada_Card> 
-          <Jornada_Card title="Jornada 7" players={players}></Jornada_Card> 
-          <Jornada_Card title="Jornada 8" players={players}></Jornada_Card> 
-          <Jornada_Card title="Jornada 9" players={players}></Jornada_Card>  */}
-          
+        <Cardconfig ronda="Ronda 1" players={players} matchDetails={matchesRonda1} />
+        <Cardconfig ronda="Ronda 2" players={players} matchDetails={matchesRonda2} />
+        <Cardconfig ronda="Ronda 3" players={players} matchDetails={matchesRonda3} />
+        <Cardconfig ronda="Ronda 4" players={players} matchDetails={matchesRonda4} />
+        <Cardconfig ronda="Ronda 5" players={players} matchDetails={matchesRonda5} />
+        <Cardconfig ronda="Ronda 6" players={players} matchDetails={matchesRonda6} />
+        <Cardconfig ronda="Ronda 7" players={players} matchDetails={matchesRonda7} />
         </div>
-    
-        
-          
       </div>
-      
-      
-    
     </div>
   );
 };
 
-export default FirebaseExample;
+export default Config;

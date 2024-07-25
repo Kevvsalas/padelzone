@@ -1,9 +1,9 @@
 
-import styles from './card.module.css'
+import styles from './cardConfig.module.css'
 
 
 
-const Card = ({ ronda, players, matchDetails }) => {
+const Cardconfig = ({ ronda, players, matchDetails }) => {
     const getPlayerNames = (indices) => {
       return indices.map(index => players[index] ? players[index].name : 'N/A');
     };
@@ -43,5 +43,5 @@ const Card = ({ ronda, players, matchDetails }) => {
     );
   };
   
-  export default Card;
+  export default Cardconfig;
   
