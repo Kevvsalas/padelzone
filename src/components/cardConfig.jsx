@@ -1,36 +1,28 @@
 import React, { useState } from 'react';
 import styles from './cardConfig.module.css';
-import { ref, update, set } from 'firebase/database';
+import { ref, set, update } from 'firebase/database';
 import { database } from '../firebase';
 
 const Cardconfig = ({ ronda, players, matchDetails }) => {
-
   const [results, setResults] = useState(
     matchDetails.map(() => ({ team1: '', team2: '' }))
   );
-  const [formData, setFormData] = useState({
-    input1: '',
-    input2: '',
-  });
+  const [isDisabled, setIsDisabled] = useState(false);
 
-  
   const getPlayerNames = (indices) => {
     return indices.map(index => players[index] ? players[index].name : 'N/A');
   };
 
-  const handleResultChange = (matchIndex, team, value,) => {
-    
+  const handleResultChange = (matchIndex, team, value) => {
     const updatedResults = [...results];
     updatedResults[matchIndex][team] = value;
     setResults(updatedResults);
   };
 
-  const [isDisabled, setIsDisabled] = useState(false);
-  
-  const handleFinalizarRonda = () => {
+  const handleSaveResults = () => {
     setIsDisabled(true);
     const rondaData = {
-      ronda: ronda,
+      ronda,
       resultados: matchDetails.map((match, index) => {
         const [team1Player1, team1Player2] = getPlayerNames(match.team1Indices);
         const [team2Player1, team2Player2] = getPlayerNames(match.team2Indices);
@@ -101,7 +93,6 @@ const Cardconfig = ({ ronda, players, matchDetails }) => {
         <div className={styles.marcador}>
           <input
             type="text"
-            name='input1'
             value={results[matchIndex].team1}
             onChange={(e) => handleResultChange(matchIndex, 'team1', e.target.value)}
             disabled={isDisabled}
@@ -112,7 +103,6 @@ const Cardconfig = ({ ronda, players, matchDetails }) => {
         <div className={styles.marcador}>
           <input
             type="text"
-            name='input2'
             value={results[matchIndex].team2}
             onChange={(e) => handleResultChange(matchIndex, 'team2', e.target.value)}
             disabled={isDisabled}
@@ -132,10 +122,10 @@ const Cardconfig = ({ ronda, players, matchDetails }) => {
     <div className={styles.container}>
       <button
         className={`${isDisabled ? styles.disabledButton : styles.button}`}
-        onClick={handleFinalizarRonda}
+        onClick={handleSaveResults}
         disabled={isDisabled}
       >
-        Finalizar ronda
+        Guardar Resultados
       </button>
       <div className={styles.ronda}>
         Ronda {ronda}
