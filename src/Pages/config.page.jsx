@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { database } from '../firebase';
 import { ref, set, push, onValue, remove } from 'firebase/database';
-import styles from './form.module.css';
+import styles from './config.module.css';
 import borrar from '../assets/borrar.png';
 import Cardconfig from '../components/cardConfig';
 
@@ -28,22 +28,25 @@ const Config = () => {
   const clearDatabase = () => {
     const playerRef = ref(database, 'player');
     const rondasRef = ref(database, 'rondas');
-    remove(playerRef)
+  
+    // Limpiar el localStorage
+    localStorage.clear();
+  
+    // Eliminar los datos de la base de datos
+    Promise.all([
+      remove(playerRef),
+      remove(rondasRef)
+    ])
       .then(() => {
         console.log('Database cleared successfully');
-      })
-      .catch((error) => {
-        console.error('Error clearing database:', error);
-      });
-
-    remove(rondasRef)
-      .then(() => {
-        console.log('Database cleared successfully');
+        // Recargar la página después de que se haya limpiado la base de datos
+        window.location.reload();
       })
       .catch((error) => {
         console.error('Error clearing database:', error);
       });
   };
+  
 
   const handleChangeName = (e) => {
     setPlayerName(e.target.value);

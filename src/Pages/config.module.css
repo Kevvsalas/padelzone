@@ -4,6 +4,8 @@
   flex-flow: column nowrap;
   width: 100%;
   margin: 0 auto;
+  margin-bottom: 600px;
+
 }
 
 .formulario {

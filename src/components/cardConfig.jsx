@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './cardConfig.module.css';
 import { ref, set, update } from 'firebase/database';
 import { database } from '../firebase';
@@ -8,6 +8,20 @@ const Cardconfig = ({ ronda, players, matchDetails }) => {
     matchDetails.map(() => ({ team1: '', team2: '' }))
   );
   const [isDisabled, setIsDisabled] = useState(false);
+
+  useEffect(() => {
+    // Cargar los resultados y el estado del botón desde localStorage cuando el componente se monta
+    const savedResults = localStorage.getItem(`ronda_${ronda}_results`);
+    const savedIsDisabled = localStorage.getItem(`ronda_${ronda}_isDisabled`);
+
+    if (savedResults) {
+      setResults(JSON.parse(savedResults));
+    }
+
+    if (savedIsDisabled !== null) {
+      setIsDisabled(JSON.parse(savedIsDisabled));
+    }
+  }, [ronda]);
 
   const getPlayerNames = (indices) => {
     return indices.map(index => players[index] ? players[index].name : 'N/A');
@@ -20,7 +34,7 @@ const Cardconfig = ({ ronda, players, matchDetails }) => {
   };
 
   const handleSaveResults = () => {
-    setIsDisabled(true);
+    setIsDisabled(true); // Deshabilitar el botón
     const rondaData = {
       ronda,
       resultados: matchDetails.map((match, index) => {
@@ -43,6 +57,10 @@ const Cardconfig = ({ ronda, players, matchDetails }) => {
     }).catch((error) => {
       console.error('Error al guardar en Firebase:', error);
     });
+
+    // Guarda los resultados y el estado del botón en localStorage
+    localStorage.setItem(`ronda_${ronda}_results`, JSON.stringify(results));
+    localStorage.setItem(`ronda_${ronda}_isDisabled`, JSON.stringify(true));
 
     // Actualiza el puntaje de los jugadores con los puntajes del partido
     matchDetails.forEach((match, index) => {
