@@ -1,17 +1,22 @@
 import React from 'react';
 import styles from './card.module.css';
 
-const Card = ({ ronda, players, matchDetails, results }) => {
+const Card = ({ ronda, players, matchDetails, results = [] }) => {
+    console.log(results[0])
+
+  // Obtiene los nombres de los jugadores basándose en los índices proporcionados
   const getPlayerNames = (indices) => {
     return indices.map(index => players[index] ? players[index].name : 'N/A');
   };
 
+  // Renderiza un partido específico con los detalles proporcionados
   const renderMatch = (cancha, team1Indices, team2Indices, matchIndex) => {
     const [team1Player1, team1Player2] = getPlayerNames(team1Indices);
     const [team2Player1, team2Player2] = getPlayerNames(team2Indices);
-
-    // Asegurarse de que `results` no sea undefined y tenga el índice adecuado
-    const result = results && results[matchIndex] ? results[matchIndex] : { team1: '0', team2: '0' };
+    
+    // Obtiene el resultado del partido
+    console.log(results)
+    const result = results[matchIndex] || { 'marcador equipo1': '0', 'marcador equipo2': '0' };
 
     return (
       <div className={styles.partido} key={`cancha${cancha}`}>
@@ -22,15 +27,12 @@ const Card = ({ ronda, players, matchDetails, results }) => {
           <div className={styles.name}>{team1Player1}</div>
           <div className={styles.name}>{team1Player2}</div>
         </div>
-
         <div className={styles.marcador}>
-          <span>{result.team1}</span>
+          <span>{result.marcadorEquipo1}</span>
         </div>
-
         <div className={styles.marcador}>
-          <span>{result.team2}</span>
+          <span>{result.marcadorEquipo2}</span>
         </div>
-
         <div className={styles.equipo}>
           <div className={styles.name}>{team2Player1}</div>
           <div className={styles.name}>{team2Player2}</div>
