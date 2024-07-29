@@ -11,6 +11,7 @@ function App() {
     root.render(
       <React.StrictMode>
         <AppRoutes/>
+        
       </React.StrictMode>
     )
   );

@@ -71,12 +71,15 @@ const FirebaseExample = () => {
 
   const rounds = [1, 2, 3, 4, 5, 6, 7];
 
+  // Ordenar la lista de jugadores por puntuación
+  const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
+
   return (
     <div className={styles.container}>
       <h1>Americanas Padel Zone</h1>
       <div className={styles.section1}>
         <ul className={styles.list}>
-          {players.map((player) => (
+          {sortedPlayers.map((player) => (
             <li key={player.id}>
               <div className={styles.name}>
                 {player.name}
@@ -92,7 +95,7 @@ const FirebaseExample = () => {
             <Card 
               key={ronda} // Asegúrate de que la clave sea única para cada ronda
               ronda={ronda} 
-              players={players} 
+              players={sortedPlayers} // Pasa la lista de jugadores ordenada
               matchDetails={matches[ronda]} 
               results={
                 ronda === 1 ? resultsRound1 :

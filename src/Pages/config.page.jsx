@@ -3,7 +3,6 @@ import { database } from '../firebase';
 import { ref, set, push, onValue, remove } from 'firebase/database';
 import styles from './form.module.css';
 import borrar from '../assets/borrar.png';
-
 import Cardconfig from '../components/cardConfig';
 
 const Config = () => {
@@ -37,7 +36,7 @@ const Config = () => {
         console.error('Error clearing database:', error);
       });
 
-      remove(rondasRef)
+    remove(rondasRef)
       .then(() => {
         console.log('Database cleared successfully');
       })
@@ -49,7 +48,6 @@ const Config = () => {
   const handleChangeName = (e) => {
     setPlayerName(e.target.value);
   };
-
 
   const validate = () => {
     let tempErrors = {};
@@ -79,7 +77,7 @@ const Config = () => {
     return () => unsubscribe();
   }, []);
 
-
+  // Detalles de los partidos por ronda
   const matchesRonda1 = [
     { team1Indices: [0, 1], team2Indices: [2, 3] },
     { team1Indices: [4, 5], team2Indices: [6, 7] }
@@ -115,8 +113,8 @@ const Config = () => {
     { team1Indices: [0, 7], team2Indices: [1, 6] }
   ];
 
-
-
+  // Ordenar la lista de jugadores por puntuación
+  const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
 
   return (
     <div className={styles.container}>
@@ -132,12 +130,15 @@ const Config = () => {
         />
         {errors.name && <span style={{ color: 'red' }}>{errors.name}</span>}
         
+       
+        {errors.score && <span style={{ color: 'red' }}>{errors.score}</span>}
+        
         <button type="submit">Add Player</button>
       </form>
 
       <div className={styles.section1}>
         <ul className={styles.list}>
-          {players.map((player) => (
+          {sortedPlayers.map((player) => (
             <li key={player.id}>
               <div className={styles.name}>
                 {player.name}
@@ -152,13 +153,13 @@ const Config = () => {
           </div>
         </ul>
         <div className={styles.jornada_section}>
-        <Cardconfig ronda="1" players={players} matchDetails={matchesRonda1} />
-        <Cardconfig ronda="2" players={players} matchDetails={matchesRonda2} />
-        <Cardconfig ronda="3" players={players} matchDetails={matchesRonda3} />
-        <Cardconfig ronda="4" players={players} matchDetails={matchesRonda4} />
-        <Cardconfig ronda="5" players={players} matchDetails={matchesRonda5} />
-        <Cardconfig ronda="6" players={players} matchDetails={matchesRonda6} />
-        <Cardconfig ronda="7" players={players} matchDetails={matchesRonda7} />
+          <Cardconfig ronda="1" players={sortedPlayers} matchDetails={matchesRonda1} />
+          <Cardconfig ronda="2" players={sortedPlayers} matchDetails={matchesRonda2} />
+          <Cardconfig ronda="3" players={sortedPlayers} matchDetails={matchesRonda3} />
+          <Cardconfig ronda="4" players={sortedPlayers} matchDetails={matchesRonda4} />
+          <Cardconfig ronda="5" players={sortedPlayers} matchDetails={matchesRonda5} />
+          <Cardconfig ronda="6" players={sortedPlayers} matchDetails={matchesRonda6} />
+          <Cardconfig ronda="7" players={sortedPlayers} matchDetails={matchesRonda7} />
         </div>
       </div>
     </div>
