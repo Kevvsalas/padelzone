@@ -68,7 +68,7 @@
     top: -4%;
     right: 6%;
     padding: 2px 5px;
-    background-color: cadetblue;
+    background-color: #FF9640;
 }
 
 .list li{
@@ -143,7 +143,9 @@
   }
 
   .name::-webkit-scrollbar-track {
-    background: white; /* Color de fondo del track */
+    background-color: #d6d9ce;
+
+    /* Color de fondo del track */
   }
   
   .name::-webkit-scrollbar-thumb {

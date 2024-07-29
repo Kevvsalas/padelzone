@@ -4,15 +4,18 @@
     height: 34%;
     padding: 0;
     display: flex;
-    border: 1px solid black;
+    border: 2px solid #FF8969 ;
     flex-flow: column nowrap;
     position: relative;
     margin-left: 10px;
     cursor: default;
 }
 .disabled {
-    background-color: #f0f0f0; /* Color gris claro para indicar deshabilitado */
+    color: black;
+    opacity: 50%;
+    background-color: a3a380; /* Color gris claro para indicar deshabilitado */
     cursor: not-allowed;
+    border: 2px solid #ffca9f;
 
 }
 
@@ -22,6 +25,7 @@
 
 .disabledButton{
     background-color: gray;
+    
     position: absolute;
     bottom: -7%;
     z-index: 2;
@@ -42,7 +46,7 @@
     align-items: center;
     justify-content: center;
     top: -10%;
-    background-color: red;
+    background-color: #FF9640;
     left: 36%;
     width: 30%;
     height: 20%;
@@ -107,7 +111,8 @@ transform: rotate(270deg);
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 2px solid gray;
+    border: 2px solid #FF9640;
+    
 }
 
 .marcador input{
@@ -136,7 +141,7 @@ transform: rotate(270deg);
 }
 
 .button{
-    background-color: #0077b6;
+    background-color: #69FFAC;
     position: absolute;
     bottom: -7%;
     z-index: 2;
@@ -159,7 +164,9 @@ transform: rotate(270deg);
   }
 
   .equipo::-webkit-scrollbar-track {
-    background: white; /* Color de fondo del track */
+    background-color: #d6d9ce;
+
+    /* Color de fondo del track */
   }
   
   .equipo::-webkit-scrollbar-thumb {

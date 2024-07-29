@@ -163,7 +163,11 @@ const Config = () => {
           <Cardconfig ronda="5" players={sortedPlayers} matchDetails={matchesRonda5} />
           <Cardconfig ronda="6" players={sortedPlayers} matchDetails={matchesRonda6} />
           <Cardconfig ronda="7" players={sortedPlayers} matchDetails={matchesRonda7} />
+        <button className={styles.finish}>Finalizar torneo</button>
+
         </div>
+
+
       </div>
     </div>
   );

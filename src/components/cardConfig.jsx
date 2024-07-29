@@ -3,11 +3,12 @@ import styles from './cardConfig.module.css';
 import { ref, set, update } from 'firebase/database';
 import { database } from '../firebase';
 
-const Cardconfig = ({ ronda, players, matchDetails }) => {
+const Cardconfig = ({ ronda, players, matchDetails, isPlayersAvailable }) => {
   const [results, setResults] = useState(
     matchDetails.map(() => ({ team1: '', team2: '' }))
   );
   const [isDisabled, setIsDisabled] = useState(false);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
   useEffect(() => {
     // Cargar los resultados y el estado del botón desde localStorage cuando el componente se monta
@@ -23,17 +24,40 @@ const Cardconfig = ({ ronda, players, matchDetails }) => {
     }
   }, [ronda]);
 
+  useEffect(() => {
+    // Verifica si todos los campos están vacíos o no y actualiza el estado del botón
+    const allFieldsFilled = results.every(result => 
+      result.team1.trim() !== '' && result.team2.trim() !== '' &&
+      !isNaN(result.team1) && !isNaN(result.team2)
+    );
+    setIsButtonDisabled(!allFieldsFilled || !isPlayersAvailable);
+  }, [results, isPlayersAvailable]);
+
   const getPlayerNames = (indices) => {
     return indices.map(index => players[index] ? players[index].name : 'N/A');
   };
 
   const handleResultChange = (matchIndex, team, value) => {
+    // Solo permite la entrada de números y vacíos
+    const sanitizedValue = value === '' || !isNaN(value) ? value : results[matchIndex][team];
     const updatedResults = [...results];
-    updatedResults[matchIndex][team] = value;
+    updatedResults[matchIndex][team] = sanitizedValue;
     setResults(updatedResults);
   };
 
   const handleSaveResults = () => {
+    if (isButtonDisabled) return; // No hacer nada si el botón está deshabilitado
+
+    // Verifica que todos los resultados sean números válidos
+    const validResults = results.every(result =>
+      !isNaN(result.team1) && !isNaN(result.team2) &&
+      result.team1.trim() !== '' && result.team2.trim() !== ''
+    );
+    if (!validResults) {
+      console.error('Algunos resultados no son números válidos o están vacíos.');
+      return;
+    }
+
     setIsDisabled(true); // Deshabilitar el botón
     const rondaData = {
       ronda,
@@ -67,8 +91,8 @@ const Cardconfig = ({ ronda, players, matchDetails }) => {
       const [team1Player1, team1Player2] = getPlayerNames(match.team1Indices);
       const [team2Player1, team2Player2] = getPlayerNames(match.team2Indices);
 
-      const team1Score = parseInt(results[index].team1, 10);
-      const team2Score = parseInt(results[index].team2, 10);
+      const team1Score = parseInt(results[index].team1, 10) || 0;
+      const team2Score = parseInt(results[index].team2, 10) || 0;
 
       updatePlayerScore(team1Player1, team1Score);
       updatePlayerScore(team1Player2, team1Score);
@@ -110,7 +134,7 @@ const Cardconfig = ({ ronda, players, matchDetails }) => {
 
         <div className={styles.marcador}>
           <input
-            type="text"
+            type="number"
             value={results[matchIndex].team1}
             onChange={(e) => handleResultChange(matchIndex, 'team1', e.target.value)}
             disabled={isDisabled}
@@ -120,7 +144,7 @@ const Cardconfig = ({ ronda, players, matchDetails }) => {
 
         <div className={styles.marcador}>
           <input
-            type="text"
+            type="number"
             value={results[matchIndex].team2}
             onChange={(e) => handleResultChange(matchIndex, 'team2', e.target.value)}
             disabled={isDisabled}
@@ -141,7 +165,7 @@ const Cardconfig = ({ ronda, players, matchDetails }) => {
       <button
         className={`${isDisabled ? styles.disabledButton : styles.button}`}
         onClick={handleSaveResults}
-        disabled={isDisabled}
+        disabled={isDisabled || isButtonDisabled}
       >
         Guardar Resultados
       </button>
