@@ -2,9 +2,12 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    height: 100vh;
+    justify-content: flex-start;
+    padding: 20%;
+    margin: 0 auto;
+    height: 200vh;
     background-color: #f0f0f0;
+    margin-bottom: 200vh;
   }
   
   h2 {

@@ -9,10 +9,8 @@ function App() {
   return (
     
     root.render(
-      <React.StrictMode>
         <AppRoutes/>
         
-      </React.StrictMode>
     )
   );
 }

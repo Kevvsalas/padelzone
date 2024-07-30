@@ -10,6 +10,10 @@ const Config = () => {
   const [score, setScore] = useState(0);
   const [players, setPlayers] = useState([]);
   const [errors, setErrors] = useState({});
+  const [isInputDisabled, setIsInputDisabled] = useState(false);
+  const [editPlayerId, setEditPlayerId] = useState(null);
+  const [newName, setNewName] = useState('');
+  const [nameError, setNameError] = useState('');
 
   const addPlayer = () => {
     const playerRef = ref(database, 'player');
@@ -46,7 +50,6 @@ const Config = () => {
         console.error('Error clearing database:', error);
       });
   };
-  
 
   const handleChangeName = (e) => {
     setPlayerName(e.target.value);
@@ -54,7 +57,10 @@ const Config = () => {
 
   const validate = () => {
     let tempErrors = {};
-    if (!playerName) tempErrors.name = "Name is required";
+    if (!playerName) tempErrors.name = "El nombre es obligatorio";
+    if (players.some(player => player.name.toLowerCase() === playerName.toLowerCase())) {
+      tempErrors.name = "El nombre ya esta en la lista";
+    }
     if (score === '' || isNaN(score) || score < 0) tempErrors.score = "Valid score is required";
     return tempErrors;
   };
@@ -64,8 +70,37 @@ const Config = () => {
     const tempErrors = validate();
     setErrors(tempErrors);
     if (Object.keys(tempErrors).length === 0) {
-      addPlayer();
+      if (players.length < 8) {
+        addPlayer();
+      } else {
+        setIsInputDisabled(true);
+      }
     }
+  };
+
+  const editName = (playerId, playerName) => { 
+    setEditPlayerId(playerId);
+    setNewName(playerName);
+    setNameError(''); // Clear previous errors
+  };
+
+  const updatePlayerName = async (playerId, newName) => {
+    // verifica si el nombre ya existe en la lista
+    if (players.some(player => player.name.toLowerCase() === newName.toLowerCase() && player.id !== playerId)) {
+      setNameError('El nombre ya existe');
+      return;
+    }
+
+    const playerRef = ref(database, `player/${playerId}`);
+    set(playerRef, { ...players.find(player => player.id === playerId), name: newName })
+      .then(() => {
+        setEditPlayerId(null); // Oculta el campo de edicion
+        setNewName(''); // Limpia el campo de edicion
+        setNameError(''); //Limpia el mensaje de error
+      })
+      .catch(error => {
+        console.error('Error actualizando el nombre:', error);
+      });
   };
 
   useEffect(() => {
@@ -75,12 +110,19 @@ const Config = () => {
       const data = snapshot.val();
       const playersList = data ? Object.entries(data).map(([id, player]) => ({ id, ...player })) : [];
       setPlayers(playersList);
+
+      
+      if (playersList.length >= 8) {
+        setIsInputDisabled(true);
+      } else {
+        setIsInputDisabled(false);
+      }
     });
 
     return () => unsubscribe();
   }, []);
 
-  // Detalles de los partidos por ronda
+  // Details of matches by round
   const matchesRonda1 = [
     { team1Indices: [0, 1], team2Indices: [2, 3] },
     { team1Indices: [4, 5], team2Indices: [6, 7] }
@@ -116,7 +158,7 @@ const Config = () => {
     { team1Indices: [0, 7], team2Indices: [1, 6] }
   ];
 
-  // Ordenar la lista de jugadores por puntuación
+  // Sort the player list by score
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
 
   return (
@@ -129,22 +171,37 @@ const Config = () => {
           name="name"
           value={playerName}
           onChange={handleChangeName}
-          placeholder="Enter player name"
+          placeholder="Nombre"
+          disabled={isInputDisabled}
         />
         {errors.name && <span style={{ color: 'red' }}>{errors.name}</span>}
         
-       
         {errors.score && <span style={{ color: 'red' }}>{errors.score}</span>}
         
-        <button type="submit">Add Player</button>
+        <button type="submit" disabled={isInputDisabled}>Agregar</button>
       </form>
 
       <div className={styles.section1}>
         <ul className={styles.list}>
           {sortedPlayers.map((player) => (
-            <li key={player.id}>
+            <li key={player.id} onClick={() => editName(player.id, player.name)}>
               <div className={styles.name}>
-                {player.name}
+                {editPlayerId === player.id ? (
+                  <input
+                    type="text"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    onBlur={() => updatePlayerName(player.id, newName)} 
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        updatePlayerName(player.id, newName); 
+                      }
+                    }}
+                  />
+                ) : (
+                  player.name
+                )}
+                {nameError && <span style={{ color: 'red' }}>{nameError}</span>}
               </div>
               <div className={styles.score}>
                 {player.score}
@@ -163,11 +220,8 @@ const Config = () => {
           <Cardconfig ronda="5" players={sortedPlayers} matchDetails={matchesRonda5} />
           <Cardconfig ronda="6" players={sortedPlayers} matchDetails={matchesRonda6} />
           <Cardconfig ronda="7" players={sortedPlayers} matchDetails={matchesRonda7} />
-        <button className={styles.finish}>Finalizar torneo</button>
-
+          <button className={styles.finish}>Finalizar torneo</button>
         </div>
-
-
       </div>
     </div>
   );

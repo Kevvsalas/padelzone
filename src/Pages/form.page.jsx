@@ -14,7 +14,7 @@ const FirebaseExample = () => {
   const [resultsRound6, setResultsRound6] = useState([]);
   const [resultsRound7, setResultsRound7] = useState([]);
 
-  // Obtener jugadores de Firebase
+
   useEffect(() => {
     const playerRef = ref(database, 'player');
     

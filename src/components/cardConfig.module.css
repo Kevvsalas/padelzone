@@ -1,7 +1,7 @@
 .container{
     width: 30%;
     margin-bottom: 2.6%;
-    height: 34%;
+    height: 32%;
     padding: 0;
     display: flex;
     border: 2px solid #FF8969 ;
@@ -143,10 +143,12 @@ transform: rotate(270deg);
 .button{
     background-color: #69FFAC;
     position: absolute;
-    bottom: -7%;
+    bottom: -12%;
     z-index: 2;
-    padding: 7px;
-    left: 34%;
+    text-align: center;
+    font-size: 95%;
+    padding: 10px;
+    left: 30%;
     border: none;
 }
 

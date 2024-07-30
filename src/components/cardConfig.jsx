@@ -8,7 +8,6 @@ const Cardconfig = ({ ronda, players, matchDetails, isPlayersAvailable }) => {
     matchDetails.map(() => ({ team1: '', team2: '' }))
   );
   const [isDisabled, setIsDisabled] = useState(false);
-  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
   useEffect(() => {
     // Cargar los resultados y el estado del botón desde localStorage cuando el componente se monta
@@ -24,15 +23,6 @@ const Cardconfig = ({ ronda, players, matchDetails, isPlayersAvailable }) => {
     }
   }, [ronda]);
 
-  useEffect(() => {
-    // Verifica si todos los campos están vacíos o no y actualiza el estado del botón
-    const allFieldsFilled = results.every(result => 
-      result.team1.trim() !== '' && result.team2.trim() !== '' &&
-      !isNaN(result.team1) && !isNaN(result.team2)
-    );
-    setIsButtonDisabled(!allFieldsFilled || !isPlayersAvailable);
-  }, [results, isPlayersAvailable]);
-
   const getPlayerNames = (indices) => {
     return indices.map(index => players[index] ? players[index].name : 'N/A');
   };
@@ -46,7 +36,7 @@ const Cardconfig = ({ ronda, players, matchDetails, isPlayersAvailable }) => {
   };
 
   const handleSaveResults = () => {
-    if (isButtonDisabled) return; // No hacer nada si el botón está deshabilitado
+    if (isDisabled) return; // No hacer nada si el botón está deshabilitado
 
     // Verifica que todos los resultados sean números válidos
     const validResults = results.every(result =>
@@ -108,7 +98,6 @@ const Cardconfig = ({ ronda, players, matchDetails, isPlayersAvailable }) => {
   };
 
   const updatePlayerScore = (playerName, scoreToAdd) => {
-    // Encuentra el jugador por nombre y actualiza su puntaje
     const player = players.find(player => player.name === playerName);
     if (player) {
       const playerRef = ref(database, `player/${player.id}`);
@@ -134,7 +123,7 @@ const Cardconfig = ({ ronda, players, matchDetails, isPlayersAvailable }) => {
 
         <div className={styles.marcador}>
           <input
-            type="number"
+            type="text"
             value={results[matchIndex].team1}
             onChange={(e) => handleResultChange(matchIndex, 'team1', e.target.value)}
             disabled={isDisabled}
@@ -144,7 +133,7 @@ const Cardconfig = ({ ronda, players, matchDetails, isPlayersAvailable }) => {
 
         <div className={styles.marcador}>
           <input
-            type="number"
+            type="text"
             value={results[matchIndex].team2}
             onChange={(e) => handleResultChange(matchIndex, 'team2', e.target.value)}
             disabled={isDisabled}
@@ -165,7 +154,7 @@ const Cardconfig = ({ ronda, players, matchDetails, isPlayersAvailable }) => {
       <button
         className={`${isDisabled ? styles.disabledButton : styles.button}`}
         onClick={handleSaveResults}
-        disabled={isDisabled || isButtonDisabled}
+        disabled={isDisabled}
       >
         Guardar Resultados
       </button>
