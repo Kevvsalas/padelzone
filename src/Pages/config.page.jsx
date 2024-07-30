@@ -5,6 +5,38 @@ import styles from './config.module.css';
 import borrar from '../assets/borrar.png';
 import Cardconfig from '../components/cardConfig';
 
+// Constantes de partidos por ronda
+const MATCHES = {
+  1: [
+    { team1Indices: [0, 1], team2Indices: [2, 3] },
+    { team1Indices: [4, 5], team2Indices: [6, 7] }
+  ],
+  2: [
+    { team1Indices: [0, 2], team2Indices: [4, 6] },
+    { team1Indices: [1, 3], team2Indices: [5, 7] }
+  ],
+  3: [
+    { team1Indices: [1, 2], team2Indices: [5, 6] },
+    { team1Indices: [0, 3], team2Indices: [5, 7] }
+  ],
+  4: [
+    { team1Indices: [0, 4], team2Indices: [1, 5] },
+    { team1Indices: [2, 6], team2Indices: [3, 7] }
+  ],
+  5: [
+    { team1Indices: [1, 4], team2Indices: [3, 6] },
+    { team1Indices: [0, 5], team2Indices: [2, 7] }
+  ],
+  6: [
+    { team1Indices: [1, 7], team2Indices: [2, 4] },
+    { team1Indices: [0, 6], team2Indices: [3, 5] }
+  ],
+  7: [
+    { team1Indices: [2, 5], team2Indices: [3, 4] },
+    { team1Indices: [0, 7], team2Indices: [1, 6] }
+  ]
+};
+
 const Config = () => {
   const [playerName, setPlayerName] = useState('');
   const [score, setScore] = useState(0);
@@ -33,22 +65,22 @@ const Config = () => {
     const playerRef = ref(database, 'player');
     const rondasRef = ref(database, 'rondas');
   
-    // Limpiar el localStorage
-    localStorage.clear();
+    const isConfirmed = window.confirm("¿Estás seguro de que deseas eliminar toda la información y reiniciar el juego?");
+    if (isConfirmed) {
+      localStorage.clear();
   
-    // Eliminar los datos de la base de datos
-    Promise.all([
-      remove(playerRef),
-      remove(rondasRef)
-    ])
-      .then(() => {
-        console.log('Database cleared successfully');
-        // Recargar la página después de que se haya limpiado la base de datos
-        window.location.reload();
-      })
-      .catch((error) => {
-        console.error('Error clearing database:', error);
-      });
+      Promise.all([
+        remove(playerRef),
+        remove(rondasRef)
+      ])
+        .then(() => {
+          console.log('Database cleared successfully');
+          window.location.reload();
+        })
+        .catch((error) => {
+          console.error('Error clearing database:', error);
+        });
+    }
   };
 
   const handleChangeName = (e) => {
@@ -59,9 +91,9 @@ const Config = () => {
     let tempErrors = {};
     if (!playerName) tempErrors.name = "El nombre es obligatorio";
     if (players.some(player => player.name.toLowerCase() === playerName.toLowerCase())) {
-      tempErrors.name = "El nombre ya esta en la lista";
+      tempErrors.name = "El nombre ya está en la lista";
     }
-    if (score === '' || isNaN(score) || score < 0) tempErrors.score = "Valid score is required";
+    if (score === '' || isNaN(score) || score < 0) tempErrors.score = "Se requiere una puntuación válida";
     return tempErrors;
   };
 
@@ -81,11 +113,10 @@ const Config = () => {
   const editName = (playerId, playerName) => { 
     setEditPlayerId(playerId);
     setNewName(playerName);
-    setNameError(''); // Clear previous errors
+    setNameError(''); 
   };
 
   const updatePlayerName = async (playerId, newName) => {
-    // verifica si el nombre ya existe en la lista
     if (players.some(player => player.name.toLowerCase() === newName.toLowerCase() && player.id !== playerId)) {
       setNameError('El nombre ya existe');
       return;
@@ -94,9 +125,9 @@ const Config = () => {
     const playerRef = ref(database, `player/${playerId}`);
     set(playerRef, { ...players.find(player => player.id === playerId), name: newName })
       .then(() => {
-        setEditPlayerId(null); // Oculta el campo de edicion
-        setNewName(''); // Limpia el campo de edicion
-        setNameError(''); //Limpia el mensaje de error
+        setEditPlayerId(null);
+        setNewName('');
+        setNameError('');
       })
       .catch(error => {
         console.error('Error actualizando el nombre:', error);
@@ -111,7 +142,6 @@ const Config = () => {
       const playersList = data ? Object.entries(data).map(([id, player]) => ({ id, ...player })) : [];
       setPlayers(playersList);
 
-      
       if (playersList.length >= 8) {
         setIsInputDisabled(true);
       } else {
@@ -122,44 +152,11 @@ const Config = () => {
     return () => unsubscribe();
   }, []);
 
-  // Details of matches by round
-  const matchesRonda1 = [
-    { team1Indices: [0, 1], team2Indices: [2, 3] },
-    { team1Indices: [4, 5], team2Indices: [6, 7] }
-  ];
-  
-  const matchesRonda2 = [
-    { team1Indices: [0, 2], team2Indices: [4, 6] },
-    { team1Indices: [1, 3], team2Indices: [5, 7] }
-  ];
+  // Lista ordenada de jugadores para mostrar en la tabla
+  const sortedPlayersForTable = [...players].sort((a, b) => b.score - a.score);
 
-  const matchesRonda3 = [
-    { team1Indices: [1, 2], team2Indices: [5, 6] },
-    { team1Indices: [0, 3], team2Indices: [5, 7] }
-  ];
-
-  const matchesRonda4 = [
-    { team1Indices: [0, 4], team2Indices: [1, 5] },
-    { team1Indices: [2, 6], team2Indices: [3, 7] }
-  ];
-
-  const matchesRonda5 = [
-    { team1Indices: [1, 4], team2Indices: [3, 6] },
-    { team1Indices: [0, 5], team2Indices: [2, 7] }
-  ];
-
-  const matchesRonda6 = [
-    { team1Indices: [1, 7], team2Indices: [2, 4] },
-    { team1Indices: [0, 6], team2Indices: [3, 5] }
-  ];
-
-  const matchesRonda7 = [
-    { team1Indices: [2, 5], team2Indices: [3, 4] },
-    { team1Indices: [0, 7], team2Indices: [1, 6] }
-  ];
-
-  // Sort the player list by score
-  const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
+  // Lista original de jugadores para los enfrentamientos
+  const playersForMatches = players;
 
   return (
     <div className={styles.container}>
@@ -183,7 +180,7 @@ const Config = () => {
 
       <div className={styles.section1}>
         <ul className={styles.list}>
-          {sortedPlayers.map((player) => (
+          {sortedPlayersForTable.map((player) => (
             <li key={player.id} onClick={() => editName(player.id, player.name)}>
               <div className={styles.name}>
                 {editPlayerId === player.id ? (
@@ -213,13 +210,9 @@ const Config = () => {
           </div>
         </ul>
         <div className={styles.jornada_section}>
-          <Cardconfig ronda="1" players={sortedPlayers} matchDetails={matchesRonda1} />
-          <Cardconfig ronda="2" players={sortedPlayers} matchDetails={matchesRonda2} />
-          <Cardconfig ronda="3" players={sortedPlayers} matchDetails={matchesRonda3} />
-          <Cardconfig ronda="4" players={sortedPlayers} matchDetails={matchesRonda4} />
-          <Cardconfig ronda="5" players={sortedPlayers} matchDetails={matchesRonda5} />
-          <Cardconfig ronda="6" players={sortedPlayers} matchDetails={matchesRonda6} />
-          <Cardconfig ronda="7" players={sortedPlayers} matchDetails={matchesRonda7} />
+          {Object.keys(MATCHES).map(ronda => (
+            <Cardconfig key={ronda} ronda={ronda} players={playersForMatches} matchDetails={MATCHES[ronda]} />
+          ))}
           <button className={styles.finish}>Finalizar torneo</button>
         </div>
       </div>
