@@ -38,12 +38,12 @@
 
 
 .list::before{
-    content: "Score";
+    content: "Puntuacion";
     display: flex;
     position: absolute;
-    font-size: 22px;
+    font-size: 17px;
     top: -4%;
-    right: 6%;
+    right: -5.5%;
     padding: 2px 5px;
     background-color: #FF9640;
 }
@@ -52,7 +52,7 @@
     display: flex;
     padding: 0px 0px;
     justify-content: space-between;
-    font-size: 20px;
+    font-size: 18px;
     width: 80%;
 }
 
@@ -160,19 +160,18 @@
     }
   
     .list{
-    
         width: 12%;
         gap: 28px 0;
     }
 
     .list::before{
-        font-size: 35px;
-        top: -5%;
-        right: 1%;
+        font-size: 24px;
+        top: -3%;
+        right: -9.2%;
     }
 
     .list li{
-        font-size: 30px;
+        font-size: 27px;
         width: 80%;
     }
 

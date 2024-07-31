@@ -6,14 +6,7 @@ import Card from '../components/card'; // Asegúrate de que la ruta sea correcta
 
 const FirebaseExample = () => {
   const [players, setPlayers] = useState([]);
-  const [resultsRound1, setResultsRound1] = useState([]);
-  const [resultsRound2, setResultsRound2] = useState([]);
-  const [resultsRound3, setResultsRound3] = useState([]);
-  const [resultsRound4, setResultsRound4] = useState([]);
-  const [resultsRound5, setResultsRound5] = useState([]);
-  const [resultsRound6, setResultsRound6] = useState([]);
-  const [resultsRound7, setResultsRound7] = useState([]);
-
+  const [results, setResults] = useState({});
 
   useEffect(() => {
     const playerRef = ref(database, 'player');
@@ -33,25 +26,10 @@ const FirebaseExample = () => {
 
     const unsubscribe = onValue(resultsRef, (snapshot) => {
       if (snapshot.exists()) {
-        const fetchedResults = snapshot.val();
-        // Actualizar los resultados de cada ronda
-        setResultsRound1(fetchedResults[1]?.resultados || []);
-        setResultsRound2(fetchedResults[2]?.resultados || []);
-        setResultsRound3(fetchedResults[3]?.resultados || []);
-        setResultsRound4(fetchedResults[4]?.resultados || []);
-        setResultsRound5(fetchedResults[5]?.resultados || []);
-        setResultsRound6(fetchedResults[6]?.resultados || []);
-        setResultsRound7(fetchedResults[7]?.resultados || []);
+        setResults(snapshot.val());
       } else {
         console.log('No results found.');
-        // Establecer estados a arrays vacíos si no hay resultados
-        setResultsRound1([]);
-        setResultsRound2([]);
-        setResultsRound3([]);
-        setResultsRound4([]);
-        setResultsRound5([]);
-        setResultsRound6([]);
-        setResultsRound7([]);
+        setResults({});
       }
     });
 
@@ -95,17 +73,9 @@ const FirebaseExample = () => {
             <Card 
               key={ronda} // Asegúrate de que la clave sea única para cada ronda
               ronda={ronda} 
-              players={sortedPlayers} // Pasa la lista de jugadores ordenada
+              players={players} // Pasa la lista de jugadores original para los enfrentamientos
               matchDetails={matches[ronda]} 
-              results={
-                ronda === 1 ? resultsRound1 :
-                ronda === 2 ? resultsRound2 :
-                ronda === 3 ? resultsRound3 :
-                ronda === 4 ? resultsRound4 :
-                ronda === 5 ? resultsRound5 :
-                ronda === 6 ? resultsRound6 :
-                resultsRound7
-              }
+              results={results[ronda]?.resultados || []} // Utiliza los resultados de Firebase
             />
           ))}
         </div>

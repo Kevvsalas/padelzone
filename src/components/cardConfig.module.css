@@ -1,7 +1,7 @@
 .container{
     width: 30%;
     margin-bottom: 2.6%;
-    height: 32%;
+    height: 27%;
     padding: 0;
     display: flex;
     border: 2px solid #FF8969 ;
@@ -143,12 +143,12 @@ transform: rotate(270deg);
 .button{
     background-color: #69FFAC;
     position: absolute;
-    bottom: -12%;
+    bottom: -18%;
     z-index: 2;
     text-align: center;
-    font-size: 95%;
+    font-size: 80%;  
     padding: 10px;
-    left: 30%;
+    left: 31.5%;
     border: none;
 }
 
@@ -178,3 +178,6 @@ transform: rotate(270deg);
   .equipo::-webkit-scrollbar-thumb:hover {
     background: #00b4d8; /* Color de la barra de desplazamiento al pasar el mouse */
   }
+
+
+
