@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext} from 'react';
+import React, { useState, useEffect} from 'react';
 import { database } from '../firebase';
 import { ref, set, push, onValue, remove } from 'firebase/database';
 import styles from './config.module.css';
@@ -6,7 +6,6 @@ import borrar from '../assets/borrar.png';
 import Cardconfig from '../components/cardConfig';
 import Card_12 from '../components/Card_12';
 
-import {TorneoContext} from '../torneoContext';
 
 const Config = () => {
 
@@ -102,7 +101,6 @@ const Config = () => {
   
   
 
-  const { torneo, changeTorneo } = useContext(TorneoContext); // Desestructurar el valor del contexto
   const [playerName, setPlayerName] = useState('');
   const [score, setScore] = useState(0);
   const [players, setPlayers] = useState([]);
@@ -111,13 +109,6 @@ const Config = () => {
   const [editPlayerId, setEditPlayerId] = useState(null);
   const [newName, setNewName] = useState('');
   const [nameError, setNameError] = useState('');
-
-
-  const changeContext = () => {
-    changeTorneo();
-  }
-  
-
 
 
   const addPlayer = () => {
@@ -166,7 +157,7 @@ const Config = () => {
     const tempErrors = validate();
     setErrors(tempErrors);
     if (Object.keys(tempErrors).length === 0) {
-      if (players.length < torneo) {
+      if (players.length < 8) {
         addPlayer();
       } else {
         setIsInputDisabled(true);
@@ -212,12 +203,12 @@ const Config = () => {
   }, []);
 
   useEffect(() => {
-    if (players.length >= torneo) {
+    if (players.length >= 8) {
       setIsInputDisabled(true);
     } else {
       setIsInputDisabled(false);
     }
-  }, [players, torneo]);
+  }, [players]);
 
   const sortedPlayersForTable = [...players].sort((a, b) => b.score - a.score);
   const playersForMatches = players;
@@ -225,7 +216,7 @@ const Config = () => {
   return (
     <div className={styles.container}>
       <h1>Americanas Padel Zone</h1>
-      <button className={styles.game} onClick={changeContext}>
+      <button className={styles.game}>
         Cambiar torneo
       </button>
       <form className={styles.formulario} onSubmit={handleSubmit}>
@@ -271,12 +262,8 @@ const Config = () => {
           </div>
         </ul>
         <div className={styles.jornada_section}>
-          {torneo === 8 
-            ? Object.keys(MATCHES8).map(ronda => (
+          { Object.keys(MATCHES8).map(ronda => (
                 <Cardconfig key={ronda} ronda={ronda} players={playersForMatches} matchDetails={MATCHES8[ronda]} />
-              ))
-            : Object.keys(MATCHES12).map(ronda => (
-                <Card_12 key={ronda} ronda={ronda} players={playersForMatches} matchDetails={MATCHES12[ronda]} />
               ))
           }
         </div>

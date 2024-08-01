@@ -1,13 +1,11 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect} from 'react';
 import { database } from '../firebase';
 import { ref, onValue } from 'firebase/database';
 import styles from './form.module.css';
 import Card from '../components/card'; // Asegúrate de que la ruta sea correcta
-import { TorneoContext } from '../torneoContext';
-const FirebaseExample = ( { forceReneder }) => {
+const FirebaseExample = ( ) => {
 
 
-  const { torneo } = useContext(TorneoContext); // Desestructurar el valor del contexto
   const [players, setPlayers] = useState([]);
   const [results, setResults] = useState({});
   
@@ -57,7 +55,6 @@ const FirebaseExample = ( { forceReneder }) => {
 
   return (
     <div className={styles.container}>
-      <h2>{torneo}</h2> {/* Mostrar el valor del contexto */}
       <h1>Americanas Padel Zone</h1>
       <div className={styles.section1}>
         <ul className={styles.list}>
