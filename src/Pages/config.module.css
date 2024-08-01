@@ -6,9 +6,38 @@
   width: 100%;
   margin: 0 auto;
   margin-bottom: 600px;
-  
+  position: relative;
+}
+
+
+.container h1:hover{
+  cursor: default;
+}
+.game{
+  background-color: #0077b6;
+  width: 18%;
+  height: 5%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  position: absolute;
+  top: 6%;
+  right: 10%;
+  border: none;
+  border-radius: 20px;
+  transition: all ease-in-out .3s;
 
 }
+
+.game:hover{
+  cursor: pointer;
+  scale: .9;
+  border-radius: 15px;
+  transition: all ease-in-out .3s;
+}
+
+
 
 .formulario {
   display: flex;
@@ -39,21 +68,23 @@
   font-size: 16px;
   border-radius: 5px;
   padding: 7px;
+  transition: all ease-in-out .4s;
+
 }
 
 .formulario button:hover{
   cursor: pointer;
   transform: scale(1.1);
-  transition: all ease-in .1s;
+  transition: all ease-in-out .4s;
 }
 
 .list{
   display: flex;
-  min-height: 70vh;
+  min-height: auto;
   flex-flow: column nowrap;
   border: 2px solid #FF8969 ;
   width: 18%;
-  gap: 15px 0;
+  gap: 3px 0;
   margin-top: 10px;
   padding: 15px 0;
   list-style: none;
@@ -82,6 +113,7 @@
   justify-content: space-between;
   font-size: 20px;
   width: 80%;
+
 }
 
 
@@ -112,32 +144,42 @@
   text-decoration: none;
   background-color: #AD69FF;
   border: none;
-  font-size: 140%;
+  font-size: 100%;
   border-radius: 5px;
   margin-top: 5%;
-  width: 18%;
-  height: 10%;
+  width: 40%;
+  height: 100%;
+  transition: all ease-in-out .3s;
+
 }
 .finish:hover{
   cursor: pointer;
-  transform: scale(1.1);
-  transition: all ease-in .1s;
+  transform: scale(1.2);
+  transition: all ease-in-out .3s;
 }
 
+.delete{
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  position: absolute;
+  bottom: -14%;
+}
 
 
 .delete img{
   width: 30%;
   height: auto;
-  position: absolute;
   bottom: 2%;
   left: 34%;
+  transition: all ease-in .3s;
+
 }
 
 .delete img:hover{
   cursor: pointer;
   transform: scale(1.1);
-  transition: all ease-out .4;
+  transition: all ease-out .3s;
 
 }
 

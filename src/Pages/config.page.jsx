@@ -1,43 +1,108 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext} from 'react';
 import { database } from '../firebase';
 import { ref, set, push, onValue, remove } from 'firebase/database';
 import styles from './config.module.css';
 import borrar from '../assets/borrar.png';
 import Cardconfig from '../components/cardConfig';
+import Card_12 from '../components/Card_12';
 
-// Constantes de partidos por ronda
-const MATCHES = {
-  1: [
-    { team1Indices: [0, 1], team2Indices: [2, 3] },
-    { team1Indices: [4, 5], team2Indices: [6, 7] }
-  ],
-  2: [
-    { team1Indices: [0, 2], team2Indices: [4, 6] },
-    { team1Indices: [1, 3], team2Indices: [5, 7] }
-  ],
-  3: [
-    { team1Indices: [1, 2], team2Indices: [5, 6] },
-    { team1Indices: [0, 3], team2Indices: [5, 7] }
-  ],
-  4: [
-    { team1Indices: [0, 4], team2Indices: [1, 5] },
-    { team1Indices: [2, 6], team2Indices: [3, 7] }
-  ],
-  5: [
-    { team1Indices: [1, 4], team2Indices: [3, 6] },
-    { team1Indices: [0, 5], team2Indices: [2, 7] }
-  ],
-  6: [
-    { team1Indices: [1, 7], team2Indices: [2, 4] },
-    { team1Indices: [0, 6], team2Indices: [3, 5] }
-  ],
-  7: [
-    { team1Indices: [2, 5], team2Indices: [3, 4] },
-    { team1Indices: [0, 7], team2Indices: [1, 6] }
-  ]
-};
+import {TorneoContext} from '../torneoContext';
 
 const Config = () => {
+
+ 
+  const MATCHES8 = {
+    1: [
+      { team1Indices: [0, 1], team2Indices: [2, 3] },
+      { team1Indices: [4, 5], team2Indices: [6, 7] }
+    ],
+    2: [
+      { team1Indices: [0, 2], team2Indices: [4, 6] },
+      { team1Indices: [1, 3], team2Indices: [5, 7] }
+    ],
+    3: [
+      { team1Indices: [1, 2], team2Indices: [5, 6] },
+      { team1Indices: [0, 3], team2Indices: [4, 7] }
+    ],
+    4: [
+      { team1Indices: [0, 4], team2Indices: [1, 5] },
+      { team1Indices: [2, 6], team2Indices: [3, 7] }
+    ],
+    5: [
+      { team1Indices: [1, 4], team2Indices: [3, 6] },
+      { team1Indices: [0, 5], team2Indices: [2, 7] }
+    ],
+    6: [
+      { team1Indices: [1, 7], team2Indices: [2, 4] },
+      { team1Indices: [0, 6], team2Indices: [3, 5] }
+    ],
+    7: [
+      { team1Indices: [2, 5], team2Indices: [3, 4] },
+      { team1Indices: [0, 7], team2Indices: [1, 6] }
+    ],
+    8: [
+      { team1Indices: [0, 1], team2Indices: [4, 5] },
+      { team1Indices: [2, 3], team2Indices: [6, 7] }
+    ],
+    9: [
+      { team1Indices: [0, 2], team2Indices: [1, 3] },
+      { team1Indices: [4, 6], team2Indices: [5, 7] }
+    ]
+  };
+  
+  
+  
+  const MATCHES12 = {
+    1: [
+      { team1Indices: [0, 1], team2Indices: [2, 3] },
+      { team1Indices: [0, 1], team2Indices: [2, 3] },
+      { team1Indices: [4, 5], team2Indices: [6, 7] }
+    ],
+    2: [
+      { team1Indices: [0, 2], team2Indices: [4, 6] },
+      { team1Indices: [0, 2], team2Indices: [4, 6] },
+      { team1Indices: [1, 3], team2Indices: [5, 7] }
+    ],
+    3: [
+      { team1Indices: [1, 2], team2Indices: [5, 6] },
+      { team1Indices: [1, 2], team2Indices: [5, 6] },
+      { team1Indices: [0, 3], team2Indices: [4, 7] }
+    ],
+    4: [
+      { team1Indices: [0, 4], team2Indices: [1, 5] },
+      { team1Indices: [0, 4], team2Indices: [1, 5] },
+      { team1Indices: [2, 6], team2Indices: [3, 7] }
+    ],
+    5: [
+      { team1Indices: [1, 4], team2Indices: [3, 6] },
+      { team1Indices: [1, 4], team2Indices: [3, 6] },
+      { team1Indices: [0, 5], team2Indices: [2, 7] }
+    ],
+    6: [
+      { team1Indices: [1, 7], team2Indices: [2, 4] },
+      { team1Indices: [1, 7], team2Indices: [2, 4] },
+      { team1Indices: [0, 6], team2Indices: [3, 5] }
+    ],
+    7: [
+      { team1Indices: [2, 5], team2Indices: [3, 4] },
+      { team1Indices: [2, 5], team2Indices: [3, 4] },
+      { team1Indices: [0, 7], team2Indices: [1, 6] }
+    ],
+    8: [
+      { team1Indices: [0, 1], team2Indices: [4, 5] },
+      { team1Indices: [0, 1], team2Indices: [4, 5] },
+      { team1Indices: [2, 3], team2Indices: [6, 7] }
+    ],
+    9: [
+      { team1Indices: [0, 2], team2Indices: [1, 3] },
+      { team1Indices: [0, 2], team2Indices: [1, 3] },
+      { team1Indices: [4, 6], team2Indices: [5, 7] }
+    ]
+  };
+  
+  
+
+  const { torneo, changeTorneo } = useContext(TorneoContext); // Desestructurar el valor del contexto
   const [playerName, setPlayerName] = useState('');
   const [score, setScore] = useState(0);
   const [players, setPlayers] = useState([]);
@@ -47,15 +112,18 @@ const Config = () => {
   const [newName, setNewName] = useState('');
   const [nameError, setNameError] = useState('');
 
+
+  const changeContext = () => {
+    changeTorneo();
+  }
+  
+
+
+
   const addPlayer = () => {
     const playerRef = ref(database, 'player');
     const newPlayerRef = push(playerRef);
-
-    const newPlayer = {
-      name: playerName,
-      score: score
-    };
-
+    const newPlayer = { name: playerName, score: score };
     set(newPlayerRef, newPlayer);
     setPlayerName('');
     setScore(0);
@@ -68,14 +136,10 @@ const Config = () => {
     const isConfirmed = window.confirm("¿Estás seguro de que deseas eliminar toda la información y reiniciar el juego?");
     if (isConfirmed) {
       localStorage.clear();
-  
-      Promise.all([
-        remove(playerRef),
-        remove(rondasRef)
-      ])
+      Promise.all([remove(playerRef), remove(rondasRef)])
         .then(() => {
           console.log('Database cleared successfully');
-          window.location.reload();
+          window.location.assign("/home");
         })
         .catch((error) => {
           console.error('Error clearing database:', error);
@@ -89,11 +153,11 @@ const Config = () => {
 
   const validate = () => {
     let tempErrors = {};
-    if (!playerName) tempErrors.name = "El nombre es obligatorio";
-    if (players.some(player => player.name.toLowerCase() === playerName.toLowerCase())) {
+    const trimmedPlayerName = playerName.trim();
+    if (!trimmedPlayerName) tempErrors.name = "El nombre es obligatorio";
+    if (players.some(player => player.name.trim().toLowerCase() === trimmedPlayerName.toLowerCase())) {
       tempErrors.name = "El nombre ya está en la lista";
     }
-    if (score === '' || isNaN(score) || score < 0) tempErrors.score = "Se requiere una puntuación válida";
     return tempErrors;
   };
 
@@ -102,7 +166,7 @@ const Config = () => {
     const tempErrors = validate();
     setErrors(tempErrors);
     if (Object.keys(tempErrors).length === 0) {
-      if (players.length < 8) {
+      if (players.length < torneo) {
         addPlayer();
       } else {
         setIsInputDisabled(true);
@@ -121,7 +185,6 @@ const Config = () => {
       setNameError('El nombre ya existe');
       return;
     }
-
     const playerRef = ref(database, `player/${playerId}`);
     set(playerRef, { ...players.find(player => player.id === playerId), name: newName })
       .then(() => {
@@ -134,6 +197,8 @@ const Config = () => {
       });
   };
 
+
+
   useEffect(() => {
     const playerRef = ref(database, 'player');
 
@@ -141,27 +206,28 @@ const Config = () => {
       const data = snapshot.val();
       const playersList = data ? Object.entries(data).map(([id, player]) => ({ id, ...player })) : [];
       setPlayers(playersList);
-
-      if (playersList.length >= 8) {
-        setIsInputDisabled(true);
-      } else {
-        setIsInputDisabled(false);
-      }
     });
 
     return () => unsubscribe();
   }, []);
 
-  // Lista ordenada de jugadores para mostrar en la tabla
-  const sortedPlayersForTable = [...players].sort((a, b) => b.score - a.score);
+  useEffect(() => {
+    if (players.length >= torneo) {
+      setIsInputDisabled(true);
+    } else {
+      setIsInputDisabled(false);
+    }
+  }, [players, torneo]);
 
-  // Lista original de jugadores para los enfrentamientos
+  const sortedPlayersForTable = [...players].sort((a, b) => b.score - a.score);
   const playersForMatches = players;
 
   return (
     <div className={styles.container}>
       <h1>Americanas Padel Zone</h1>
-
+      <button className={styles.game} onClick={changeContext}>
+        Cambiar torneo
+      </button>
       <form className={styles.formulario} onSubmit={handleSubmit}>
         <input
           type="text"
@@ -172,12 +238,8 @@ const Config = () => {
           disabled={isInputDisabled}
         />
         {errors.name && <span style={{ color: 'red' }}>{errors.name}</span>}
-        
-        {errors.score && <span style={{ color: 'red' }}>{errors.score}</span>}
-        
         <button type="submit" disabled={isInputDisabled}>Agregar</button>
       </form>
-
       <div className={styles.section1}>
         <ul className={styles.list}>
           {sortedPlayersForTable.map((player) => (
@@ -188,10 +250,10 @@ const Config = () => {
                     type="text"
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
-                    onBlur={() => updatePlayerName(player.id, newName)} 
-                    onKeyPress={(e) => {
+                    onBlur={() => updatePlayerName(player.id, newName)}
+                    onKeyDown={(e) => {
                       if (e.key === 'Enter') {
-                        updatePlayerName(player.id, newName); 
+                        updatePlayerName(player.id, newName);
                       }
                     }}
                   />
@@ -200,20 +262,23 @@ const Config = () => {
                 )}
                 {nameError && <span style={{ color: 'red' }}>{nameError}</span>}
               </div>
-              <div className={styles.score}>
-                {player.score}
-              </div>  
+              <div className={styles.score}>{player.score}</div>  
             </li>
           ))}
           <div className={styles.delete}>
             <img src={borrar} alt="borrar" onClick={clearDatabase} />
+            <button className={styles.finish}>Finalizar torneo</button>
           </div>
         </ul>
         <div className={styles.jornada_section}>
-          {Object.keys(MATCHES).map(ronda => (
-            <Cardconfig key={ronda} ronda={ronda} players={playersForMatches} matchDetails={MATCHES[ronda]} />
-          ))}
-          <button className={styles.finish}>Finalizar torneo</button>
+          {torneo === 8 
+            ? Object.keys(MATCHES8).map(ronda => (
+                <Cardconfig key={ronda} ronda={ronda} players={playersForMatches} matchDetails={MATCHES8[ronda]} />
+              ))
+            : Object.keys(MATCHES12).map(ronda => (
+                <Card_12 key={ronda} ronda={ronda} players={playersForMatches} matchDetails={MATCHES12[ronda]} />
+              ))
+          }
         </div>
       </div>
     </div>
