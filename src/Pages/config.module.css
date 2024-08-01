@@ -30,11 +30,16 @@
 
 }
 
-.game:hover{
+.buttonEnabled:hover{
   cursor: pointer;
   scale: .9;
   border-radius: 15px;
   transition: all ease-in-out .3s;
+}
+
+
+.buttonDisabled{
+  cursor: not-allowed;
 }
 
 

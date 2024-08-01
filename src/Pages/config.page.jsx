@@ -110,6 +110,7 @@ const Config = () => {
   const [newName, setNewName] = useState('');
   const [nameError, setNameError] = useState('');
   const [tournamentValue, setTournamentValue] = useState(8);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
 
   const addPlayer = () => {
@@ -253,6 +254,8 @@ const Config = () => {
       const data = snapshot.val();
       const playersList = data ? Object.entries(data).map(([id, player]) => ({ id, ...player })) : [];
       setPlayers(playersList);
+      const hasPositiveScore = playersList.some(player => player.score > 0);
+      setIsButtonDisabled(hasPositiveScore);
     });
 
     return () => unsubscribe();
@@ -272,7 +275,11 @@ const Config = () => {
   return (
     <div className={styles.container}>
       <h1>Americanas Padel Zone</h1>
-      <button className={styles.game} onClick={changeTournament}>
+      <button 
+           className={`${styles.game} ${isButtonDisabled ? styles.buttonDisabled : styles.buttonEnabled}`}
+          onClick={changeTournament}       
+          disabled={isButtonDisabled}
+       >
         Cambiar para {(tournamentValue === 8 ? "12" : "8")} jugadores
       </button>
       <form className={styles.formulario} onSubmit={handleSubmit}>
