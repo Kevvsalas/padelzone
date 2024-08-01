@@ -1,10 +1,10 @@
 import React, { useState, useEffect} from 'react';
 import { database } from '../firebase';
-import { ref, set, push, onValue, remove } from 'firebase/database';
+import { get, ref, set, push, onValue, remove } from 'firebase/database';
 import styles from './config.module.css';
 import borrar from '../assets/borrar.png';
 import Cardconfig from '../components/cardConfig';
-import Card_12 from '../components/Card_12';
+import Card_12 from '../components/Card_12.config';
 
 
 const Config = () => {
@@ -54,8 +54,8 @@ const Config = () => {
   const MATCHES12 = {
     1: [
       { team1Indices: [0, 1], team2Indices: [2, 3] },
-      { team1Indices: [0, 1], team2Indices: [2, 3] },
-      { team1Indices: [4, 5], team2Indices: [6, 7] }
+      { team1Indices: [4, 5], team2Indices: [6, 7] },
+      { team1Indices: [8, 9], team2Indices: [10, 11] }
     ],
     2: [
       { team1Indices: [0, 2], team2Indices: [4, 6] },
@@ -109,6 +109,7 @@ const Config = () => {
   const [editPlayerId, setEditPlayerId] = useState(null);
   const [newName, setNewName] = useState('');
   const [nameError, setNameError] = useState('');
+  const [tournamentValue, setTournamentValue] = useState(8);
 
 
   const addPlayer = () => {
@@ -157,7 +158,7 @@ const Config = () => {
     const tempErrors = validate();
     setErrors(tempErrors);
     if (Object.keys(tempErrors).length === 0) {
-      if (players.length < 8) {
+      if (players.length < tournamentValue) {
         addPlayer();
       } else {
         setIsInputDisabled(true);
@@ -188,7 +189,62 @@ const Config = () => {
       });
   };
 
+  useEffect(() => {
+    const elementName = '8';
+    const elementRef = ref(database, `tournament/${elementName}`);
 
+    const fetchTournamentValue = async () => {
+      try {
+        const snapshot = await get(elementRef);
+        if (snapshot.exists()) {
+          setTournamentValue(snapshot.val());
+        } else {
+          console.error('El elemento no existe');
+        }
+      } catch (error) {
+        console.error('Error al leer el valor del elemento:', error);
+      }
+    };
+
+    fetchTournamentValue();
+  }, []);
+
+
+  const changeTournament = () => {
+    const elementName = '8';
+    const elementRef = ref(database, `tournament/${elementName}`);
+
+    get(elementRef)
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          const currentValue = snapshot.val();
+          let newValue;
+
+          if (currentValue === 8) {
+            newValue = 12;
+          } else if (currentValue === 12) {
+            newValue = 8;
+          } else {
+            console.error('Valor inesperado:', currentValue);
+            return;
+          }
+
+          set(elementRef, newValue)
+            .then(() => {
+              console.log(`Elemento actualizado exitosamente a ${newValue}`);
+              setTournamentValue(newValue); // Actualizar el estado con el nuevo valor
+            })
+            .catch((error) => {
+              console.error('Error al actualizar el elemento:', error);
+            });
+        } else {
+          console.error('El elemento no existe');
+        }
+      })
+      .catch((error) => {
+        console.error('Error al leer el valor del elemento:', error);
+      });
+  }
 
   useEffect(() => {
     const playerRef = ref(database, 'player');
@@ -203,21 +259,21 @@ const Config = () => {
   }, []);
 
   useEffect(() => {
-    if (players.length >= 8) {
+    if (players.length >= tournamentValue) {
       setIsInputDisabled(true);
     } else {
       setIsInputDisabled(false);
     }
   }, [players]);
-
+  console.log(tournamentValue)
   const sortedPlayersForTable = [...players].sort((a, b) => b.score - a.score);
   const playersForMatches = players;
 
   return (
     <div className={styles.container}>
       <h1>Americanas Padel Zone</h1>
-      <button className={styles.game}>
-        Cambiar torneo
+      <button className={styles.game} onClick={changeTournament}>
+        Cambiar para {(tournamentValue === 8 ? "12" : "8")} jugadores
       </button>
       <form className={styles.formulario} onSubmit={handleSubmit}>
         <input
@@ -257,16 +313,21 @@ const Config = () => {
             </li>
           ))}
           <div className={styles.delete}>
-            <img src={borrar} alt="borrar" onClick={clearDatabase} />
+            <img src={borrar} alt="borrar" onClick={clearDatabase} /> 
             <button className={styles.finish}>Finalizar torneo</button>
           </div>
         </ul>
         <div className={styles.jornada_section}>
-          { Object.keys(MATCHES8).map(ronda => (
-                <Cardconfig key={ronda} ronda={ronda} players={playersForMatches} matchDetails={MATCHES8[ronda]} />
-              ))
-          }
-        </div>
+            {
+              tournamentValue === 8 ?
+                Object.keys(MATCHES8).map(ronda => (
+                  <Cardconfig key={ronda} ronda={ronda} players={playersForMatches} matchDetails={MATCHES8[ronda]} />
+                )) :
+                Object.keys(MATCHES12).map(ronda => (
+                  <Card_12 key={ronda} ronda={ronda} players={playersForMatches} matchDetails={MATCHES12[ronda]} />
+                ))
+            }
+</div>
       </div>
     </div>
   );

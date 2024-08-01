@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import styles from './cardConfig.module.css';
+import styles from  './Card_12.config.module.css';
 import { ref, set, update } from 'firebase/database';
 import { database } from '../firebase';
 
-const Cardconfig = ({ ronda, players, matchDetails}) => {
+const Card_12 = ({ ronda, players, matchDetails }) => {
   const [results, setResults] = useState(
     matchDetails.map(() => ({ team1: '', team2: '' }))
   );
@@ -107,11 +107,6 @@ const Cardconfig = ({ ronda, players, matchDetails}) => {
     }
   };
 
-
-
-
-  
-
   const renderMatch = (cancha, team1Indices, team2Indices, matchIndex) => {
     const [team1Player1, team1Player2] = getPlayerNames(team1Indices);
     const [team2Player1, team2Player2] = getPlayerNames(team2Indices);
@@ -173,4 +168,4 @@ const Cardconfig = ({ ronda, players, matchDetails}) => {
   );
 };
 
-export default Cardconfig;
+export default Card_12;
