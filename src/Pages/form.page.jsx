@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { database } from '../firebase';
 import { get, ref, onValue } from 'firebase/database';
 import styles from './form.module.css';
-import card from '../components/card'; // Asegúrate de que la ruta sea correcta
+import Card from  '../components/card'; // Asegúrate de que la ruta sea correcta
 import ScreenCard12 from '../components/Card_12'; // Asegúrate de que la ruta sea correcta
 
 const FirebaseExample = () => {
@@ -124,7 +124,6 @@ const FirebaseExample = () => {
   return (
     <div className={styles.container}>
       <h1>Americanas Padel Zone</h1>
-      <p>{tournamentValue}</p>
       <div className={styles.section1}>
         <ul className={styles.list}>
           {sortedPlayers.map((player) => (
@@ -141,7 +140,7 @@ const FirebaseExample = () => {
         <div className={styles.jornada_section}>
           {tournamentValue === 8 ? (
             rounds.map((ronda) => (
-              <card 
+              <Card
                 key={ronda} // Asegúrate de que la clave sea única para cada ronda
                 ronda={ronda} 
                 players={players} // Pasa la lista de jugadores original para los enfrentamientos

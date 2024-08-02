@@ -5,7 +5,7 @@ import styles from './config.module.css';
 import borrar from '../assets/borrar.png';
 import Cardconfig from '../components/cardConfig';
 import Card_12 from '../components/Card_12.config';
-
+import Continue  from '../assets/continuar.png';
 
 const Config = () => {
 
@@ -140,6 +140,30 @@ const Config = () => {
     }
   };
 
+
+  const finishTournament = () => {
+    const playerRef = ref(database, 'player');
+    const rondasRef = ref(database, 'rondas');
+  
+    
+    localStorage.clear();
+    Promise.all([remove(playerRef), remove(rondasRef)])
+      .then(() => {
+        console.log('Database cleared successfully');
+        window.location.assign("/home");
+      })
+      .catch((error) => {
+        console.error('Error clearing database:', error);
+      });
+    
+  };
+
+
+
+
+
+
+
   const handleChangeName = (e) => {
     setPlayerName(e.target.value);
   };
@@ -210,6 +234,68 @@ const Config = () => {
     fetchTournamentValue();
   }, []);
 
+  const saveScore = async (playersArray) => {
+    try {
+      const historyScoresRef = ref(database, 'historyScores');
+      const snapshot = await get(historyScoresRef);
+      const historyScoresData = snapshot.val() || {};
+  
+      const updatedScores = { ...historyScoresData };
+  
+      playersArray.forEach(player => {
+        const existingPlayer = Object.values(historyScoresData).find(p => p.name === player.name);
+        if (existingPlayer) {
+          //  Si el jugador existe se actualiza el score
+          existingPlayer.score += player.score;
+          const playerKey = Object.keys(historyScoresData).find(key => historyScoresData[key].name === player.name);
+          updatedScores[playerKey] = existingPlayer;
+        } else {
+          // Si no existe se crea un nuevo registro
+          const newPlayerKey = push(historyScoresRef).key;
+          updatedScores[newPlayerKey] = player;
+        }
+      });
+  
+      await set(historyScoresRef, updatedScores);
+      console.log("Score actualizado en la tabla historica.");
+    } catch (error) {
+      console.error("Error actualizando el score en la tabla historica:", error);
+    }
+  };
+  
+  const saveData = async () => {
+    const playerRef = ref(database, 'player');
+    const snapshot = await get(playerRef);
+  
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      const playersArray = Object.values(data).map(player => ({ name: player.name, score: player.score }));
+      const resultsRef = ref(database, 'tournamentResults');
+  
+      const newTournamentRef = push(resultsRef);
+      const tournamentId = newTournamentRef.key;
+  
+      const timestamp = new Date().toISOString();
+  
+      const resultsData = {
+        timestamp: timestamp,
+        players: playersArray,
+        tournamentType: tournamentValue // Guardamos el tipo de torneo en los resultados
+      };
+  
+      await set(newTournamentRef, resultsData);
+      await finishTournament();
+  
+      // Guardamos el tipo de torneo en la tabla "tournament"
+      const tournamentRef = ref(database, `tournament/${tournamentId}`);
+      await set(tournamentRef, { tournamentType: tournamentValue });
+  
+      // Llamar a saveScore para actualizar las puntuaciones en historyScores
+      await saveScore(playersArray);
+  
+      console.log("Tournament results saved successfully");
+    }
+  };
 
   const changeTournament = () => {
     const elementName = '8';
@@ -282,6 +368,10 @@ const Config = () => {
        >
         Cambiar para {(tournamentValue === 8 ? "12" : "8")} jugadores
       </button>
+      <button onClick={saveData} className={styles.finish}>
+        <img src={Continue} className={styles.finish_img} alt="finalizar" />
+        Finalizar torneo</button>
+
       <form className={styles.formulario} onSubmit={handleSubmit}>
         <input
           type="text"
@@ -321,7 +411,6 @@ const Config = () => {
           ))}
           <div className={styles.delete}>
             <img src={borrar} alt="borrar" onClick={clearDatabase} /> 
-            <button className={styles.finish}>Finalizar torneo</button>
           </div>
         </ul>
         <div className={styles.jornada_section}>
