@@ -63,6 +63,56 @@
     transition: all ease-in .3;
 }
 
+
+
+
+.table{
+  display: flex;
+  min-height: 70vh;
+  flex-flow: column nowrap;
+  border: 1px solid black;
+  width: 18%;
+  gap: 15px 0;
+  margin-top: 10px;
+  padding: 15px 0;
+  list-style: none;
+  align-items: center;
+  position: relative;
+}
+
+
+
+.table::before{
+  content: "Puntuacion";
+  display: flex;
+  position: absolute;
+  font-size: 17px;
+  top: -4%;
+  right: -5.5%;
+  padding: 2px 5px;
+  background-color: #FF9640;
+}
+
+.table li{
+  display: flex;
+  padding: 0px 0px;
+  justify-content: space-between;
+  font-size: 18px;
+  width: 80%;
+}
+
+
+
+.table li:hover{
+  cursor: default;
+  transition: all ease-in .3;
+}
+
+
+
+
+
+
 .section1{
     flex-wrap: nowrap;
     padding: 10px;
@@ -155,6 +205,10 @@
 
   @media (min-width: 1920px) {
  
+
+    
+
+
     .container h1{
       font-size: 40px;
     }
@@ -174,6 +228,32 @@
         font-size: 27px;
         width: 80%;
     }
+
+
+
+    .table{ 
+      min-height: 0;
+      max-height: 40vh;
+      margin-right: 100px;
+      width: 12%;
+      gap: 28px 0;
+  }
+  
+  
+  
+  .table::before{
+      content: "TOP DEL MES";
+      font-size: 24px;
+      top: -5%;
+      right: 12%;
+  }
+  
+  .table li{
+    gap: 28px 0;
+    font-size: 27px;
+  }
+  
+  
 
     .jornada_section{
         width: 70%;

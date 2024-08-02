@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { database } from '../firebase';
 import { get, ref, onValue } from 'firebase/database';
 import styles from './form.module.css';
-import Card from  '../components/card'; // Asegúrate de que la ruta sea correcta
+import Card from '../components/card'; // Asegúrate de que la ruta sea correcta
 import ScreenCard12 from '../components/Card_12'; // Asegúrate de que la ruta sea correcta
 
 const FirebaseExample = () => {
   const [players, setPlayers] = useState([]);
   const [results, setResults] = useState({});
   const [tournamentValue, setTournamentValue] = useState(8);
+  const [historyScores, setHistoryScores] = useState([]);
 
   useEffect(() => {
     // Obtener jugadores de Firebase
@@ -36,6 +37,7 @@ const FirebaseExample = () => {
   }, []);
 
   useEffect(() => {
+    // Obtener valor del torneo desde Firebase
     const elementName = '8';
     const elementRef = ref(database, `tournament/${elementName}`);
 
@@ -54,6 +56,22 @@ const FirebaseExample = () => {
 
     fetchTournamentValue();
   }, []);
+
+  useEffect(() => {
+    // Obtener puntajes históricos desde Firebase
+    const historyScoresRef = ref(database, 'historyScores');
+    const unsubscribe = onValue(historyScoresRef, (snapshot) => {
+      const data = snapshot.val();
+      const scoresList = data ? Object.entries(data).map(([id, score]) => ({ id, ...score })) : [];
+      setHistoryScores(scoresList);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Ordenar y filtrar los 5 jugadores con más puntuación
+  const topScores = historyScores
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5);
 
   // Detalles de los partidos por ronda
   const MATCHES8 = {
@@ -160,6 +178,18 @@ const FirebaseExample = () => {
             ))
           )}
         </div>
+        <ul className={styles.table}>
+          {topScores.map((score) => (
+            <li key={score.id}>
+              <div className={styles.name}>
+                  {score.name}
+              </div>
+              <div className={styles.score}>
+                {score.score}
+              </div>  
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );

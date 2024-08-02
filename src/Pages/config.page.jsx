@@ -285,11 +285,7 @@ const Config = () => {
   
       await set(newTournamentRef, resultsData);
       await finishTournament();
-  
-      // Guardamos el tipo de torneo en la tabla "tournament"
-      const tournamentRef = ref(database, `tournament/${tournamentId}`);
-      await set(tournamentRef, { tournamentType: tournamentValue });
-  
+    
       // Llamar a saveScore para actualizar las puntuaciones en historyScores
       await saveScore(playersArray);
   
