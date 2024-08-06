@@ -111,6 +111,8 @@ const Config = () => {
   const [nameError, setNameError] = useState('');
   const [tournamentValue, setTournamentValue] = useState(8);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+  const [filteredSuggestions, setFilteredSuggestions] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
 
 
   const addPlayer = () => {
@@ -158,14 +160,18 @@ const Config = () => {
     
   };
 
-
-
-
-
-
-
   const handleChangeName = (e) => {
-    setPlayerName(e.target.value);
+    const value = e.target.value;
+    setPlayerName(value);
+  
+    if (value) {
+      const filtered = suggestions.filter(name =>
+        name.toLowerCase().includes(value.toLowerCase())
+      );
+      setFilteredSuggestions(filtered);
+    } else {
+      setFilteredSuggestions([]);
+    }
   };
 
   const validate = () => {
@@ -190,6 +196,26 @@ const Config = () => {
       }
     }
   };
+  useEffect(() => {
+    fetchSuggestions();
+  }, []);
+
+  const fetchSuggestions = async () => {
+    try {
+      const historyScoresRef = ref(database, 'historyScores');
+      const snapshot = await get(historyScoresRef);
+      const data = snapshot.val();
+      if (data) {
+        const fetchedSuggestions = Object.values(data).map(player => player.name);
+        setSuggestions(fetchedSuggestions);
+      }
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
+    }
+  };
+
+
+
 
   const editName = (playerId, playerName) => { 
     setEditPlayerId(playerId);
@@ -241,23 +267,30 @@ const Config = () => {
       const historyScoresData = snapshot.val() || {};
   
       const updatedScores = { ...historyScoresData };
-  
-      playersArray.forEach(player => {
-        const existingPlayer = Object.values(historyScoresData).find(p => p.name === player.name);
-        if (existingPlayer) {
-          //  Si el jugador existe se actualiza el score
-          existingPlayer.score += player.score;
-          const playerKey = Object.keys(historyScoresData).find(key => historyScoresData[key].name === player.name);
-          updatedScores[playerKey] = existingPlayer;
-        } else {
-          // Si no existe se crea un nuevo registro
-          const newPlayerKey = push(historyScoresRef).key;
-          updatedScores[newPlayerKey] = player;
-        }
-      });
-  
-      await set(historyScoresRef, updatedScores);
-      console.log("Score actualizado en la tabla historica.");
+        playersArray.forEach(player => {
+          const existingPlayer = Object.values(historyScoresData).find(p => p.name === player.name);
+          if (existingPlayer) {
+            //  Si el jugador existe se actualiza el score
+            existingPlayer.score += player.score;
+            const playerKey = Object.keys(historyScoresData).find(key => historyScoresData[key].name === player.name);
+            updatedScores[playerKey] = existingPlayer;
+          } else {
+            // Si no existe se crea un nuevo registro
+            const newPlayerKey = push(historyScoresRef).key;
+            updatedScores[newPlayerKey] = player;
+          }
+        });
+    
+        await set(historyScoresRef, updatedScores);
+        console.log("Score actualizado en la tabla historica.");
+
+      
+
+
+
+
+
+
     } catch (error) {
       console.error("Error actualizando el score en la tabla historica:", error);
     }
@@ -273,26 +306,33 @@ const Config = () => {
       const resultsRef = ref(database, 'tournamentResults');
   
       const newTournamentRef = push(resultsRef);
-      const tournamentId = newTournamentRef.key;
-  
       const timestamp = new Date().toISOString();
   
       const resultsData = {
         timestamp: timestamp,
         players: playersArray,
-        tournamentType: tournamentValue // Guardamos el tipo de torneo en los resultados
+        tournamentType: tournamentValue // Guardar el tipo de torneo
       };
   
-      await set(newTournamentRef, resultsData);
-      await finishTournament();
-    
-      // Llamar a saveScore para actualizar las puntuaciones en historyScores
-      await saveScore(playersArray);
+      // Guardar los jugadores con mayor puntaje
+      const maxScore = Math.max(...playersArray.map(player => player.score));
+      const highestScorePlayers = playersArray.filter(player => player.score === maxScore);
   
-      console.log("Tournament results saved successfully");
+      // Incluir los ganadores en los resultados
+      resultsData.winners = highestScorePlayers;
+  
+      const isConfirmed = window.confirm("¿Quieres finalizar el torneo?");
+      if (isConfirmed) {
+        await set(newTournamentRef, resultsData);
+        finishTournament();
+        console.log("Tournament results saved successfully");
+      }
+  
+      // Llamar a saveScore
+      await saveScore(playersArray);
     }
   };
-
+  
   const changeTournament = () => {
     const elementName = '8';
     const elementRef = ref(database, `tournament/${elementName}`);
@@ -370,6 +410,7 @@ const Config = () => {
 
       <form className={styles.formulario} onSubmit={handleSubmit}>
         <input
+          autoComplete='off'
           type="text"
           name="name"
           value={playerName}
@@ -379,6 +420,22 @@ const Config = () => {
         />
         {errors.name && <span style={{ color: 'red' }}>{errors.name}</span>}
         <button type="submit" disabled={isInputDisabled}>Agregar</button>
+
+        {filteredSuggestions.length > 0 && (
+          <ul className={styles.suggestionList}>
+            {filteredSuggestions.map((suggestion,index) => (
+              <li
+              key={index}
+              onClick={ () => { 
+                setPlayerName(suggestion);
+                setFilteredSuggestions([]);
+              }}
+              >
+               {suggestion}
+              </li>
+            ))}
+          </ul>
+        )}
       </form>
       <div className={styles.section1}>
         <ul className={styles.list}>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { database } from '../firebase';
-import { get, ref, onValue } from 'firebase/database';
+import { get, ref, onValue, push } from 'firebase/database';
 import styles from './form.module.css';
 import Card from '../components/card'; // Asegúrate de que la ruta sea correcta
 import ScreenCard12 from '../components/Card_12'; // Asegúrate de que la ruta sea correcta
@@ -10,6 +10,8 @@ const FirebaseExample = () => {
   const [results, setResults] = useState({});
   const [tournamentValue, setTournamentValue] = useState(8);
   const [historyScores, setHistoryScores] = useState([]);
+  const [winner, setWinner] = useState(null); // Estado para guardar el ganador
+  const [showWinner, setShowWinner] = useState(false); // Estado para controlar la visualización del ganador
 
   useEffect(() => {
     // Obtener jugadores de Firebase
@@ -64,6 +66,25 @@ const FirebaseExample = () => {
       const data = snapshot.val();
       const scoresList = data ? Object.entries(data).map(([id, score]) => ({ id, ...score })) : [];
       setHistoryScores(scoresList);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    // Escuchar cambios en los resultados del torneo para obtener el ganador
+    const resultsRef = ref(database, 'tournamentResults');
+    const unsubscribe = onValue(resultsRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const latestResult = Object.values(data).pop(); // Obtener el último resultado
+        if (latestResult && latestResult.winners) {
+          setWinner(latestResult.winners);
+          setShowWinner(true); // Mostrar el ganador
+          setTimeout(() => {
+            setShowWinner(false); // Ocultar el ganador después de 3 segundos
+          }, 3000);
+        }
+      }
     });
     return () => unsubscribe();
   }, []);
@@ -142,6 +163,17 @@ const FirebaseExample = () => {
   return (
     <div className={styles.container}>
       <h1>Americanas Padel Zone</h1>
+      {showWinner && winner && (
+        <div className={styles.winner}>
+          <h2>¡Ganador!</h2>
+          {winner.map((player) => (
+            <div key={player.id}>
+              <p>Nombre: {player.name}</p>
+              <p>Puntaje: {player.score}</p>
+            </div>
+          ))}
+        </div>
+      )}
       <div className={styles.section1}>
         <ul className={styles.list}>
           {sortedPlayers.map((player) => (
