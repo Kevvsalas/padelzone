@@ -180,26 +180,61 @@
   }
   
   .name::-webkit-scrollbar-thumb:hover {
-    background: #00b4d8; /* Color de la barra de desplazamiento al pasar el mouse */
+    background: #00b4d8; 
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* 
+  .winner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 3rem;
+    text-align: center;
+    color: #ff5733;
+    background-color: #d6d9ce;
+    animation: fadeIn 0.2s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  .winnerMessage {
+    transition: opacity 0.5s ease-out;
+  }
+  
+  .hideWinner {
+    opacity: 0;
+  }
+  
+  /* Animación para ocultar cartas */
+  /* @keyframes fadeOut {
+    from {
+      opacity: 1;
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+  }
+  
+  .hideCards {
+    animation: fadeOut 1s forwards;
+    animation-fill-mode: forwards;
+  }
+  
+  .hideCardsDone {
+    display: none;
+  }
+  */
 
   /*VISTA EN PANTALLA*/
 

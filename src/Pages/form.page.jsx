@@ -1,31 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { database } from '../firebase';
-import { get, ref, onValue, push } from 'firebase/database';
+import { get, ref, onValue, onChildAdded } from 'firebase/database';
 import styles from './form.module.css';
-import Card from '../components/card'; // Asegúrate de que la ruta sea correcta
-import ScreenCard12 from '../components/Card_12'; // Asegúrate de que la ruta sea correcta
+import Card from '../components/card'; 
+import ScreenCard12 from '../components/Card_12'; 
 
 const FirebaseExample = () => {
   const [players, setPlayers] = useState([]);
   const [results, setResults] = useState({});
   const [tournamentValue, setTournamentValue] = useState(8);
   const [historyScores, setHistoryScores] = useState([]);
-  const [winner, setWinner] = useState(null); // Estado para guardar el ganador
-  const [showWinner, setShowWinner] = useState(false); // Estado para controlar la visualización del ganador
+  const [winner, setWinner] = useState(null);
+  const [showWinner, setShowWinner] = useState(false);
+  const [playersLoaded, setPlayersLoaded] = useState(false);
+  const [lastWinnerTimestamp, setLastWinnerTimestamp] = useState(null);
 
   useEffect(() => {
-    // Obtener jugadores de Firebase
     const playerRef = ref(database, 'player');
     const unsubscribe = onValue(playerRef, (snapshot) => {
       const data = snapshot.val();
       const playersList = data ? Object.entries(data).map(([id, player]) => ({ id, ...player })) : [];
       setPlayers(playersList);
+      setPlayersLoaded(true);
     });
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    // Obtener resultados de rondas de Firebase
     const resultsRef = ref(database, 'rondas');
     const unsubscribe = onValue(resultsRef, (snapshot) => {
       if (snapshot.exists()) {
@@ -39,7 +40,6 @@ const FirebaseExample = () => {
   }, []);
 
   useEffect(() => {
-    // Obtener valor del torneo desde Firebase
     const elementName = '8';
     const elementRef = ref(database, `tournament/${elementName}`);
 
@@ -60,7 +60,6 @@ const FirebaseExample = () => {
   }, []);
 
   useEffect(() => {
-    // Obtener puntajes históricos desde Firebase
     const historyScoresRef = ref(database, 'historyScores');
     const unsubscribe = onValue(historyScoresRef, (snapshot) => {
       const data = snapshot.val();
@@ -71,30 +70,49 @@ const FirebaseExample = () => {
   }, []);
 
   useEffect(() => {
-    // Escuchar cambios en los resultados del torneo para obtener el ganador
+    // Intenta recuperar el timestamp de la última vez que se mostró un ganador desde el almacenamiento local
+    const storedTimestamp = localStorage.getItem('lastWinnerTimestamp');
+    if (storedTimestamp) {
+      setLastWinnerTimestamp(parseInt(storedTimestamp, 10));
+    }
+
     const resultsRef = ref(database, 'tournamentResults');
-    const unsubscribe = onValue(resultsRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const latestResult = Object.values(data).pop(); // Obtener el último resultado
-        if (latestResult && latestResult.winners) {
-          setWinner(latestResult.winners);
-          setShowWinner(true); // Mostrar el ganador
-          setTimeout(() => {
-            setShowWinner(false); // Ocultar el ganador después de 3 segundos
-          }, 3000);
+    const unsubscribe = onChildAdded(resultsRef, (snapshot) => {
+      const nuevoTorneo = snapshot.val();
+      if (nuevoTorneo && nuevoTorneo.winners) {
+        console.log('Nuevo ganador:', nuevoTorneo.winners);
+        const now = Date.now();
+        
+        // Solo muestra el ganador si no hay timestamp guardado o si han pasado más de 24 horas desde el último ganador
+        if (!lastWinnerTimestamp || (now - lastWinnerTimestamp > 24 * 60 * 60 * 1000)) {
+          setWinner(nuevoTorneo.winners);
+          setShowWinner(true);
+
+          // Actualiza el timestamp en el almacenamiento local
+          localStorage.setItem('lastWinnerTimestamp', now);
+
+          // Establece un temporizador para ocultar al ganador después de 5 segundos
+          const timer = setTimeout(() => {
+            setShowWinner(false);
+            setWinner(null);
+          }, 5000);
+
+          // Limpia el temporizador cuando el componente se desmonte o cuando cambie el resultado
+          return () => clearTimeout(timer);
+        } else {
+          setWinner(null);
+          setShowWinner(false);
         }
       }
     });
-    return () => unsubscribe();
-  }, []);
 
-  // Ordenar y filtrar los 5 jugadores con más puntuación
+    return () => unsubscribe();
+  }, [lastWinnerTimestamp]);
+
   const topScores = historyScores
     .sort((a, b) => b.score - a.score)
     .slice(0, 5);
 
-  // Detalles de los partidos por ronda
   const MATCHES8 = {
     1: [{ team1Indices: [0, 1], team2Indices: [2, 3] }, { team1Indices: [4, 5], team2Indices: [6, 7] }],
     2: [{ team1Indices: [0, 2], team2Indices: [4, 6] }, { team1Indices: [1, 3], team2Indices: [5, 7] }],
@@ -157,13 +175,12 @@ const FirebaseExample = () => {
 
   const rounds = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-  // Ordenar la lista de jugadores por puntuación
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
 
   return (
     <div className={styles.container}>
       <h1>Americanas Padel Zone</h1>
-      {showWinner && winner && (
+      {showWinner && winner ? (
         <div className={styles.winner}>
           <h2>¡Ganador!</h2>
           {winner.map((player) => (
@@ -173,56 +190,61 @@ const FirebaseExample = () => {
             </div>
           ))}
         </div>
-      )}
-      <div className={styles.section1}>
-        <ul className={styles.list}>
-          {sortedPlayers.map((player) => (
-            <li key={player.id}>
-              <div className={styles.name}>
-                {player.name}
-              </div>
-              <div className={styles.score}>
-                {player.score}
-              </div>  
-            </li>
-          ))}
-        </ul>
-        <div className={styles.jornada_section}>
-          {tournamentValue === 8 ? (
-            rounds.map((ronda) => (
-              <Card
-                key={ronda} // Asegúrate de que la clave sea única para cada ronda
-                ronda={ronda} 
-                players={players} // Pasa la lista de jugadores original para los enfrentamientos
-                matchDetails={MATCHES8[ronda]} 
-                results={results[ronda]?.resultados || []} // Utiliza los resultados de Firebase
-              />
-            ))
-          ) : (
-            rounds.map((ronda) => (
-              <ScreenCard12 
-                key={ronda} // Asegúrate de que la clave sea única para cada ronda
-                ronda={ronda} 
-                players={players} // Pasa la lista de jugadores original para los enfrentamientos
-                matchDetails={MATCHES12[ronda]} 
-                results={results[ronda]?.resultados || []} 
-              />
-            ))
+      ) : (
+        <div className={styles.section1}>
+          {playersLoaded && (
+            <>
+          <ul className={styles.list}>
+            {sortedPlayers.map((player) => (
+              <li key={player.id}>
+                <div className={styles.name}>
+                  {player.name}
+                </div>
+                <div className={styles.score}>
+                  {player.score}
+                </div>  
+              </li>
+            ))}
+          </ul>
+          <div className={ styles.jornada_section  /*`${styles.jornada_section} ${hideCards ? styles.hideCards : ''}`*/}>
+            {tournamentValue === 8 ? (
+              rounds.map((ronda) => (
+                <Card
+                  key={ronda} 
+                  ronda={ronda} 
+                  players={players} 
+                  matchDetails={MATCHES8[ronda]} 
+                  results={results[ronda]?.resultados || []} 
+                />
+              ))
+            ) : (
+              rounds.map((ronda) => (
+                <ScreenCard12 
+                  key={ronda} 
+                  ronda={ronda} 
+                  players={players} 
+                  matchDetails={MATCHES12[ronda]} 
+                  results={results[ronda]?.resultados || []} 
+                />
+              ))
+            )}
+          </div>
+          <ul className={styles.table}>
+            {topScores.map((score) => (
+              <li key={score.id}>
+                <div className={styles.name}>
+                  {score.name}
+                </div>
+                <div className={styles.score}>
+                  {score.score}
+                </div>  
+              </li>
+            ))}
+          </ul>
+          </>
           )}
         </div>
-        <ul className={styles.table}>
-          {topScores.map((score) => (
-            <li key={score.id}>
-              <div className={styles.name}>
-                  {score.name}
-              </div>
-              <div className={styles.score}>
-                {score.score}
-              </div>  
-            </li>
-          ))}
-        </ul>
-      </div>
+      )}
     </div>
   );
 };
